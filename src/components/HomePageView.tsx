@@ -7,6 +7,7 @@ import SmartAppBanner from '@/components/SmartAppBanner';
 import { getAllDevotionalLessons } from '@/lib/devotionalData';
 import { getAllDialogueLessons } from '@/lib/dialogueData';
 import { getTranslation, getLangConfig } from '@/lib/i18n';
+import { getHomeTranslation } from '@/lib/homeI18n';
 
 interface HomePageViewProps {
   lang?: string;
@@ -15,6 +16,7 @@ interface HomePageViewProps {
 export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
   const t = getTranslation(lang);
   const cfg = getLangConfig(lang);
+  const ht = getHomeTranslation(lang);
 
   const books = getAllBooks(lang);
   const oldTestament = books.filter((b) => b.testament === 'OT');
@@ -40,18 +42,18 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
           {/* Release Badge */}
           <div className="inline-flex items-center gap-2 bg-amber-100/90 text-amber-950 text-xs font-bold px-4 py-1.5 rounded-full mb-6 border border-amber-300/80 shadow-2xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span>Phát Hành Chính Thức v1.1.0 • Hỗ Trợ 12 Ngôn Ngữ & 31 Bài Học Mới</span>
+            <span>{ht.heroBadge}</span>
           </div>
 
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-stone-950 tracking-tight leading-[1.15] mb-6">
-            Lời Chúa Soi Đường <br className="hidden sm:block" />
+            {ht.heroHeadline1} <br className="hidden sm:block" />
             <span className="bg-gradient-to-r from-amber-800 via-amber-700 to-amber-900 bg-clip-text text-transparent">
-              Chuyển Hóa & Bình An Nội Tâm
+              {ht.heroHeadline2}
             </span>
           </h1>
 
           <p className="text-stone-600 text-base sm:text-lg md:text-xl max-w-3xl mx-auto leading-relaxed mb-10">
-            Nền tảng đọc Kinh Thánh 12 ngôn ngữ thế giới ({cfg.bibleName}) tích hợp 31 bài học thức tỉnh tâm linh, đối chiếu Lời Chúa trực tiếp và công nghệ giọng đọc trực tuyến. Hoàn toàn phi lợi nhuận, không quảng cáo.
+            {ht.heroDesc}
           </p>
 
           {/* Primary Action Buttons */}
@@ -63,8 +65,8 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
             >
               <span className="text-xl">📱</span>
               <div className="text-left">
-                <div className="leading-tight">Tải App Android (APK)</div>
-                <div className="text-[11px] text-amber-200/90 font-normal">Phiên bản v1.1.0 • 57.1 MB</div>
+                <div className="leading-tight">{ht.downloadApkTitle}</div>
+                <div className="text-[11px] text-amber-200/90 font-normal">{ht.downloadApkSub}</div>
               </div>
               <span className="text-lg ml-1">↓</span>
             </a>
@@ -83,23 +85,23 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto text-left">
             <div className="bg-white/80 backdrop-blur p-4 rounded-2xl border border-stone-200 shadow-2xs">
               <div className="text-xl mb-1">🌍</div>
-              <div className="font-bold text-sm text-stone-900">12 Ngôn Ngữ</div>
+              <div className="font-bold text-sm text-stone-900">{ht.feature12LangTitle}</div>
               <div className="text-xs text-stone-500">{cfg.localName} ({cfg.bibleName})</div>
             </div>
             <div className="bg-white/80 backdrop-blur p-4 rounded-2xl border border-stone-200 shadow-2xs">
               <div className="text-xl mb-1">⚡</div>
-              <div className="font-bold text-sm text-stone-900">Offline 100%</div>
-              <div className="text-xs text-stone-500">Tải app đọc không cần mạng</div>
+              <div className="font-bold text-sm text-stone-900">{ht.featureOfflineTitle}</div>
+              <div className="text-xs text-stone-500">{ht.featureOfflineDesc}</div>
             </div>
             <div className="bg-white/80 backdrop-blur p-4 rounded-2xl border border-stone-200 shadow-2xs">
               <div className="text-xl mb-1">🎧</div>
-              <div className="font-bold text-sm text-stone-900">{t.ttsTitle.split('(')[0]}</div>
-              <div className="text-xs text-stone-500">Giọng đọc bản xứ tự nhiên</div>
+              <div className="font-bold text-sm text-stone-900">{ht.featureTtsTitle}</div>
+              <div className="text-xs text-stone-500">{ht.featureTtsDesc}</div>
             </div>
             <div className="bg-white/80 backdrop-blur p-4 rounded-2xl border border-stone-200 shadow-2xs">
               <div className="text-xl mb-1">🕊️</div>
-              <div className="font-bold text-sm text-stone-900">Không Quảng Cáo</div>
-              <div className="text-xs text-stone-500">Tĩnh lặng trọn vẹn</div>
+              <div className="font-bold text-sm text-stone-900">{ht.featureNoAdsTitle}</div>
+              <div className="text-xs text-stone-500">{ht.featureNoAdsDesc}</div>
             </div>
           </div>
         </div>
@@ -112,13 +114,13 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-800 block mb-2">
-              Trải Nghiệm Trên Điện Thoại Di Động
+              {ht.showcaseTag}
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900 mb-4">
-              Giao Diện Tinh Tế, Đầy Đủ Tính Năng
+              {ht.showcaseTitle}
             </h2>
             <p className="text-stone-600 text-sm sm:text-base">
-              Được trau chuốt tỉ mỉ từng chi tiết nhằm mang lại trải nghiệm đọc Kinh Thánh trang nghiêm, tiện lợi nhất cho tín hữu.
+              {ht.showcaseDesc}
             </p>
           </div>
 
@@ -128,15 +130,15 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
               <div className="relative w-full max-w-[220px] rounded-[24px] overflow-hidden mb-4 shadow-lg border-[3px] border-stone-800 bg-stone-900 mx-auto">
                 <Image
                   src="/images/mockup-home.jpg"
-                  alt="Trang Chủ Ứng Dụng Thánh Kinh"
+                  alt={ht.mockupHomeTitle}
                   width={220}
                   height={391}
                   className="w-full h-auto object-cover"
                 />
               </div>
-              <h3 className="font-serif font-bold text-stone-900 text-base mb-1">Trang Chủ Tĩnh Tâm</h3>
+              <h3 className="font-serif font-bold text-stone-900 text-base mb-1">{ht.mockupHomeTitle}</h3>
               <p className="text-xs text-stone-500 text-center leading-relaxed">
-                Gợi ý câu gốc hằng ngày, lối tắt đọc tiếp và truy cập nhanh 31 bài học.
+                {ht.mockupHomeDesc}
               </p>
             </div>
 
@@ -144,15 +146,15 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
               <div className="relative w-full max-w-[220px] rounded-[24px] overflow-hidden mb-4 shadow-lg border-[3px] border-stone-800 bg-stone-900 mx-auto">
                 <Image
                   src="/images/mockup-reader.jpg"
-                  alt="Trình Đọc Kinh Thánh Song Ngữ"
+                  alt={ht.mockupReaderTitle}
                   width={220}
                   height={391}
                   className="w-full h-auto object-cover"
                 />
               </div>
-              <h3 className="font-serif font-bold text-stone-900 text-base mb-1">Trình Đọc Song Ngữ</h3>
+              <h3 className="font-serif font-bold text-stone-900 text-base mb-1">{ht.mockupReaderTitle}</h3>
               <p className="text-xs text-stone-500 text-center leading-relaxed">
-                Đối chiếu Việt - Anh song song, tự động cuộn màn hình và đọc to thành tiếng.
+                {ht.mockupReaderDesc}
               </p>
             </div>
 
@@ -160,15 +162,15 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
               <div className="relative w-full max-w-[220px] rounded-[24px] overflow-hidden mb-4 shadow-lg border-[3px] border-stone-800 bg-stone-900 mx-auto">
                 <Image
                   src="/images/mockup-books.jpg"
-                  alt="Kho 66 Sách Kinh Thánh"
+                  alt={ht.mockupBooksTitle}
                   width={220}
                   height={391}
                   className="w-full h-auto object-cover"
                 />
               </div>
-              <h3 className="font-serif font-bold text-stone-900 text-base mb-1">Tra Cứu 66 Sách</h3>
+              <h3 className="font-serif font-bold text-stone-900 text-base mb-1">{ht.mockupBooksTitle}</h3>
               <p className="text-xs text-stone-500 text-center leading-relaxed">
-                Phân loại Cựu Ước & Tân Ước rõ ràng, tìm kiếm toàn văn câu gốc siêu tốc.
+                {ht.mockupBooksDesc}
               </p>
             </div>
 
@@ -176,15 +178,15 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
               <div className="relative w-full max-w-[220px] rounded-[24px] overflow-hidden mb-4 shadow-lg border-[3px] border-stone-800 bg-stone-900 mx-auto">
                 <Image
                   src="/images/mockup-settings.jpg"
-                  alt="Cài Đặt & Cá Nhân Hóa"
+                  alt={ht.mockupSettingsTitle}
                   width={220}
                   height={391}
                   className="w-full h-auto object-cover"
                 />
               </div>
-              <h3 className="font-serif font-bold text-stone-900 text-base mb-1">Tùy Biến Trải Nghiệm</h3>
+              <h3 className="font-serif font-bold text-stone-900 text-base mb-1">{ht.mockupSettingsTitle}</h3>
               <p className="text-xs text-stone-500 text-center leading-relaxed">
-                4 chủ đề màu sắc dịu mắt, chỉnh cỡ chữ, chuyển đổi 12 ngôn ngữ tức thì.
+                {ht.mockupSettingsDesc}
               </p>
             </div>
           </div>
@@ -199,17 +201,17 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-amber-800 block mb-2">
-                Hệ Thống Rèn Luyện Toàn Diện
+                {ht.lessonsSectionTag}
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900">
-                31 Bài Học Tâm Linh & Lời Chúa Cha Giảng Dạy
+                {ht.lessonsSectionTitle}
               </h2>
             </div>
             <Link
               href={lessonsLink}
               className="inline-flex items-center gap-1.5 text-sm font-bold text-amber-800 hover:text-amber-900 hover:underline"
             >
-              <span>Xem toàn bộ 31 bài học</span>
+              <span>{ht.lessonsViewAll}</span>
               <span>→</span>
             </Link>
           </div>
@@ -220,37 +222,42 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="inline-block bg-amber-100 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
-                    Lộ Trình Căn Bản • 15 Ngày
+                    {ht.track1Badge}
                   </span>
-                  <span className="text-xs text-stone-400">5 Chủ Đề Trọng Tâm</span>
+                  <span className="text-xs text-stone-400">{ht.track1Focus}</span>
                 </div>
                 <h3 className="font-serif text-2xl font-bold text-stone-900 mb-2">
-                  Góc Suy Gẫm & Tỉnh Thức
+                  {ht.track1Title}
                 </h3>
                 <p className="text-xs sm:text-sm text-stone-600 mb-6 leading-relaxed">
-                  Thiết lập nền tảng tâm linh vững chãi: Yêu thương bản thân như đền thờ của Chúa, chữa lành các mối quan hệ bằng sự tha thứ, dâng trao lo lắng và rèn luyện đời sống đầy tớ khiêm nhu.
+                  {ht.track1Desc}
                 </p>
 
                 <div className="space-y-3 mb-6">
-                  {devotionalSample.map((l) => (
-                    <Link
-                      key={l.id}
-                      href={`/${lang}/bai-hoc/can-ban/${l.id}`}
-                      className="group flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-amber-50 border border-stone-200/70 hover:border-amber-300 transition"
-                    >
-                      <div>
-                        <div className="text-[11px] font-bold text-amber-800">
-                          Bài {l.dayNumber} • {l.topicTitleVi}
+                  {devotionalSample.map((l) => {
+                    const lessonTitle = lang === 'vi' ? l.titleVi : (l.titleEn || l.titleVi);
+                    const topicTitle = lang === 'vi' ? l.topicTitleVi : (l.topicTitleEn || l.topicTitleVi);
+                    const dayLabel = lang === 'vi' ? `Bài ${l.dayNumber}` : (lang === 'es' ? `Lección ${l.dayNumber}` : (lang === 'fr' ? `Leçon ${l.dayNumber}` : `Day ${l.dayNumber}`));
+                    return (
+                      <Link
+                        key={l.id}
+                        href={`/${lang}/bai-hoc/can-ban/${l.id}`}
+                        className="group flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-amber-50 border border-stone-200/70 hover:border-amber-300 transition"
+                      >
+                        <div>
+                          <div className="text-[11px] font-bold text-amber-800">
+                            {dayLabel} • {topicTitle}
+                          </div>
+                          <div className="font-serif font-bold text-stone-900 text-sm group-hover:text-amber-900 transition">
+                            {lessonTitle}
+                          </div>
                         </div>
-                        <div className="font-serif font-bold text-stone-900 text-sm group-hover:text-amber-900 transition">
-                          {l.titleVi}
-                        </div>
-                      </div>
-                      <span className="text-xs font-bold text-stone-400 group-hover:text-amber-800 transition">
-                        Đọc →
-                      </span>
-                    </Link>
-                  ))}
+                        <span className="text-xs font-bold text-stone-400 group-hover:text-amber-800 transition">
+                          {ht.readLessonBtn}
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -258,7 +265,7 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
                 href={`${lessonsLink}#can-ban`}
                 className="w-full text-center bg-stone-100 hover:bg-amber-100 text-stone-900 hover:text-amber-900 text-xs font-bold py-3 rounded-xl transition"
               >
-                Khám phá trọn vẹn 15 bài Căn Bản
+                {ht.track1ViewAll}
               </Link>
             </div>
 
@@ -267,37 +274,41 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <span className="inline-block bg-[#633C30] text-amber-200 text-xs font-bold px-3 py-1 rounded-full border border-amber-500/30">
-                    Lộ Trình Nâng Cao • 16 Bài
+                    {ht.track2Badge}
                   </span>
-                  <span className="text-xs text-amber-300/80">👑 Lời Chúa Cha</span>
+                  <span className="text-xs text-amber-300/80">{ht.track2Focus}</span>
                 </div>
                 <h3 className="font-serif text-2xl font-bold text-amber-50 mb-2">
-                  Bản Đồ Tâm Linh: Đối Thoại
+                  {ht.track2Title}
                 </h3>
                 <p className="text-xs sm:text-sm text-amber-200/90 mb-6 leading-relaxed">
-                  Trích xuất kiệt tác <em>Đối Thoại</em> của Thánh Catarina Siena (Lm. Vinhsơn Bùi Đức Sinh dịch). Lộ trình 4 chặng thần bí giúp linh hồn vượt qua bẫy ái kỷ để kết hiệp trọn vẹn với Thiên Chúa.
+                  {ht.track2Desc}
                 </p>
 
                 <div className="space-y-3 mb-6">
-                  {dialogueSample.map((l) => (
-                    <Link
-                      key={l.id}
-                      href={`/${lang}/bai-hoc/nang-cao/${l.id}`}
-                      className="group flex items-center justify-between p-3 rounded-xl bg-black/25 hover:bg-black/40 border border-amber-500/20 hover:border-amber-400 transition"
-                    >
-                      <div>
-                        <div className="text-[11px] font-bold text-amber-300">
-                          Chặng {l.stageNumber} • Bài {l.lessonNumber}
+                  {dialogueSample.map((l) => {
+                    const lessonTitle = lang === 'vi' ? l.titleVi : (l.titleEn || l.titleVi);
+                    const stageLabel = lang === 'vi' ? `Chặng ${l.stageNumber} • Bài ${l.lessonNumber}` : (lang === 'es' ? `Etapa ${l.stageNumber} • Lección ${l.lessonNumber}` : `Stage ${l.stageNumber} • Lesson ${l.lessonNumber}`);
+                    return (
+                      <Link
+                        key={l.id}
+                        href={`/${lang}/bai-hoc/nang-cao/${l.id}`}
+                        className="group flex items-center justify-between p-3 rounded-xl bg-black/25 hover:bg-black/40 border border-amber-500/20 hover:border-amber-400 transition"
+                      >
+                        <div>
+                          <div className="text-[11px] font-bold text-amber-300">
+                            {stageLabel}
+                          </div>
+                          <div className="font-serif font-bold text-amber-50 text-sm group-hover:text-amber-200 transition">
+                            {lessonTitle}
+                          </div>
                         </div>
-                        <div className="font-serif font-bold text-amber-50 text-sm group-hover:text-amber-200 transition">
-                          {l.titleVi}
-                        </div>
-                      </div>
-                      <span className="text-xs font-bold text-amber-400 group-hover:text-white transition">
-                        Đọc →
-                      </span>
-                    </Link>
-                  ))}
+                        <span className="text-xs font-bold text-amber-400 group-hover:text-white transition">
+                          {ht.readLessonBtn}
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -305,7 +316,7 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
                 href={`${lessonsLink}#nang-cao`}
                 className="w-full text-center bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 hover:text-white text-xs font-bold py-3 rounded-xl transition border border-amber-500/30"
               >
-                Khám phá trọn vẹn 16 bài Lời Chúa Cha
+                {ht.track2ViewAll}
               </Link>
             </div>
           </div>
@@ -321,23 +332,23 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
             <div className="absolute top-0 left-0 w-3 h-full bg-amber-800" />
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold tracking-wider text-amber-800 uppercase">
-                Câu Gốc Nổi Bật (John 3:16)
+                {ht.featuredVerseTag}
               </span>
               <span className="text-xs text-stone-500 font-mono">{cfg.bibleName}</span>
             </div>
             <blockquote className="font-serif text-xl sm:text-2xl text-stone-900 leading-relaxed mb-4">
-              “Vì Ðức Chúa Trời yêu thương thế gian, đến nỗi đã ban Con một của Ngài, hầu cho hễ ai tin Con ấy không bị hư mất mà được sự sống đời đời.”
+              {ht.featuredVerseQuote}
             </blockquote>
             <p className="font-sans text-sm text-stone-600 italic mb-6">
-              “For God so loved the world that He gave His one and only Son, that everyone who believes in Him shall not perish but have eternal life.” — Berean Standard Bible
+              {ht.featuredVerseSecondary}
             </p>
             <div className="flex items-center justify-between pt-4 border-t border-stone-200">
-              <span className="text-sm font-bold text-stone-800">John 3:16</span>
+              <span className="text-sm font-bold text-stone-800">{ht.featuredVerseRef}</span>
               <Link
                 href={`${john3Link}#cau-16`}
                 className="text-xs sm:text-sm font-bold text-amber-800 hover:text-amber-900 hover:underline inline-flex items-center gap-1.5"
               >
-                <span>Đọc toàn bộ chương 3 có âm thanh TTS</span>
+                <span>{ht.featuredVerseReadCh}</span>
                 <span>→</span>
               </Link>
             </div>
@@ -351,13 +362,13 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
       <main id="doc-kinh-thanh" className="flex-1 max-w-6xl w-full mx-auto px-4 py-16 scroll-mt-16">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-bold uppercase tracking-wider text-amber-800 block mb-2">
-            Thư Viện Lời Chúa Trực Tuyến ({cfg.localName})
+            {ht.libraryTag} ({cfg.localName})
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900 mb-3">
             {t.all66Books} • {cfg.bibleName}
           </h2>
           <p className="text-stone-600 text-sm sm:text-base">
-            Nhấp vào bất kỳ sách nào để bắt đầu đọc và nghe trực tiếp với công nghệ Web Speech API.
+            {ht.libraryDesc}
           </p>
         </div>
 
@@ -365,9 +376,9 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
         <div className="mb-14">
           <div className="flex items-center justify-between mb-4 border-b border-stone-200 pb-2">
             <h3 className="font-serif text-2xl font-bold text-stone-900">
-              {t.oldTestament} <span className="text-sm font-sans font-normal text-stone-500">({oldTestament.length} Sách)</span>
+              {t.oldTestament} <span className="text-sm font-sans font-normal text-stone-500">({oldTestament.length})</span>
             </h3>
-            <span className="text-xs text-stone-500">39 Sách Cựu Ước</span>
+            <span className="text-xs text-stone-500">{ht.oldTestamentCount}</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {oldTestament.map((b) => (
@@ -392,9 +403,9 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
         <div>
           <div className="flex items-center justify-between mb-4 border-b border-amber-800/40 pb-2">
             <h3 className="font-serif text-2xl font-bold text-stone-900">
-              {t.newTestament} <span className="text-sm font-sans font-normal text-stone-500">({newTestament.length} Sách)</span>
+              {t.newTestament} <span className="text-sm font-sans font-normal text-stone-500">({newTestament.length})</span>
             </h3>
-            <span className="text-xs text-amber-800 font-semibold">27 Sách Tân Ước</span>
+            <span className="text-xs text-amber-800 font-semibold">{ht.newTestamentCount}</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {newTestament.map((b) => {
@@ -416,7 +427,7 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
                     </span>
                     {isRev && (
                       <span className="bg-amber-700 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full shrink-0">
-                        Sách 66
+                        {ht.book66Badge}
                       </span>
                     )}
                   </div>
@@ -440,10 +451,10 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
             ✝️
           </div>
           <h2 className="font-serif text-3xl sm:text-4xl font-bold mb-3 text-amber-50">
-            Tải Ngay Ứng Dụng Thánh Kinh v1.1.0 Cho Android
+            {ht.finalCtaTitle}
           </h2>
           <p className="text-stone-400 text-sm sm:text-base max-w-xl mx-auto mb-8 leading-relaxed">
-            Cài đặt trực tiếp file APK phát hành chính thức. Đọc trọn vẹn mọi lúc mọi nơi mà không cần kết nối mạng.
+            {ht.finalCtaDesc}
           </p>
 
           <div className="inline-flex flex-col items-center">
@@ -453,10 +464,10 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
               className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-base px-8 py-4 rounded-2xl shadow-lg transition-all inline-flex items-center gap-3 transform hover:scale-105"
             >
               <span className="text-xl">📥</span>
-              <span>Tải File Cài Đặt APK (57.1 MB)</span>
+              <span>{ht.finalCtaBtn}</span>
             </a>
             <div className="text-xs text-stone-400 mt-3">
-              Tương thích Android 7.0 (Nougat) trở lên • Quét an toàn 100%
+              {ht.finalCtaSub}
             </div>
           </div>
         </div>

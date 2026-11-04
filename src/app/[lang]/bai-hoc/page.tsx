@@ -7,6 +7,7 @@ import SmartAppBanner from '@/components/SmartAppBanner';
 import { getAllDevotionalTopics, getAllDevotionalLessons } from '@/lib/devotionalData';
 import { getAllDialogueStages, getAllDialogueLessons } from '@/lib/dialogueData';
 import { isValidLang, getLangConfig, getTranslation } from '@/lib/i18n';
+import { getHomeTranslation } from '@/lib/homeI18n';
 
 interface PageProps {
   params: Promise<{
@@ -20,10 +21,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const cfg = getLangConfig(lang);
   const t = getTranslation(lang);
+  const ht = getHomeTranslation(lang);
 
   return {
-    title: `${t.lessons} (${t.lessonsBadge}) - 31 Bài Học Tâm Linh | ${cfg.localName}`,
-    description: `Khám phá 15 bài học Căn Bản suy gẫm tỉnh thức và 16 bài học Nâng Cao trích từ kiệt tác Đối Thoại.`,
+    title: `${t.lessons} (${t.lessonsBadge}) - ${ht.lessonsSectionTitle} | ${cfg.localName}`,
+    description: `${ht.track1Title} & ${ht.track2Title} - 31 Spiritual Lessons.`,
   };
 }
 
@@ -35,11 +37,14 @@ export default async function LocalizedLessonsPage({ params }: PageProps) {
 
   const cfg = getLangConfig(lang);
   const t = getTranslation(lang);
+  const ht = getHomeTranslation(lang);
 
   const devotionalTopics = getAllDevotionalTopics();
   const devotionalLessons = getAllDevotionalLessons();
   const dialogueStages = getAllDialogueStages();
   const dialogueLessons = getAllDialogueLessons();
+
+  const isVi = lang === 'vi';
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans">
@@ -51,15 +56,21 @@ export default async function LocalizedLessonsPage({ params }: PageProps) {
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-900 text-xs font-bold px-3.5 py-1.5 rounded-full mb-4 shadow-2xs">
             <span>✨</span>
-            <span>Kho Tàng Tâm Thức & Lời Chúa Ứng Nghiệm ({cfg.localName})</span>
+            <span>
+              {isVi
+                ? `Kho Tàng Tâm Thức & Lời Chúa Ứng Nghiệm (${cfg.localName})`
+                : `${ht.lessonsSectionTag} (${cfg.localName})`}
+            </span>
           </div>
 
           <h1 className="font-serif text-3xl sm:text-5xl font-bold text-stone-900 tracking-tight leading-tight mb-4">
-            31 Bài Học Tâm Linh Thức Tỉnh & Chuyển Hóa
+            {ht.lessonsSectionTitle}
           </h1>
 
           <p className="text-stone-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-6">
-            Lộ trình soi sáng từ căn bản đến nâng cao. Từng bài học đều đan cài các câu Kinh Thánh đối chiếu trực tiếp, hướng dẫn giải mã ẩn dụ và bài tập rèn luyện nội tâm hằng ngày.
+            {isVi
+              ? 'Lộ trình soi sáng từ căn bản đến nâng cao. Từng bài học đều đan cài các câu Kinh Thánh đối chiếu trực tiếp, hướng dẫn giải mã ẩn dụ và bài tập rèn luyện nội tâm hằng ngày.'
+              : `${ht.track1Desc} ${ht.track2Desc}`}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-semibold">
@@ -67,13 +78,13 @@ export default async function LocalizedLessonsPage({ params }: PageProps) {
               href="#can-ban"
               className="bg-amber-800 hover:bg-amber-900 text-white px-4 py-2 rounded-full shadow-xs transition"
             >
-              🌱 15 Bài Căn Bản (Góc Suy Gẫm)
+              🌱 {ht.track1Badge}
             </a>
             <a
               href="#nang-cao"
               className="bg-[#3D251E] hover:bg-[#2c1913] text-amber-200 px-4 py-2 rounded-full shadow-xs transition border border-amber-900/60"
             >
-              👑 16 Bài Nâng Cao (Lời Chúa Cha)
+              👑 {ht.track2Badge}
             </a>
           </div>
         </div>
@@ -88,19 +99,21 @@ export default async function LocalizedLessonsPage({ params }: PageProps) {
           <div className="mb-8">
             <div className="flex items-center gap-2 text-xs font-bold text-amber-800 uppercase tracking-wider mb-2">
               <span>🌱</span>
-              <span>Lộ Trình Căn Bản • 15 Ngày Tĩnh Tâm</span>
+              <span>{ht.track1Badge} • {ht.track1Focus}</span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900 mb-3">
-              Góc Suy Gẫm & Tỉnh Thức
+              {ht.track1Title}
             </h2>
             <p className="text-stone-600 text-sm sm:text-base max-w-3xl leading-relaxed">
-              5 chủ đề then chốt giúp xây dựng nền móng tâm linh kiên vững. Mỗi bài học đều có câu gốc Kinh Thánh đối chiếu, gợi ý suy ngẫm sâu và một bài tập cụ thể để bạn thực hành ngay trong ngày.
+              {ht.track1Desc}
             </p>
           </div>
 
           <div className="space-y-8">
             {devotionalTopics.map((topic) => {
               const lessonsOfTopic = devotionalLessons.filter((l) => l.topicId === topic.id);
+              const topicTitle = isVi ? topic.titleVi : (topic.titleEn || topic.titleVi);
+              const topicSubtitle = isVi ? topic.subtitleVi : (topic.subtitleEn || topic.subtitleVi);
 
               return (
                 <div
@@ -111,37 +124,52 @@ export default async function LocalizedLessonsPage({ params }: PageProps) {
                     <span className="text-3xl">{topic.iconEmoji}</span>
                     <div>
                       <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900">
-                        {topic.titleVi}
+                        {topicTitle}
                       </h3>
-                      <p className="text-xs text-stone-500">{topic.subtitleVi}</p>
+                      <p className="text-xs text-stone-500">{topicSubtitle}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {lessonsOfTopic.map((lesson) => (
-                      <Link
-                        key={lesson.id}
-                        href={`/${lang}/bai-hoc/can-ban/${lesson.id}`}
-                        className="group flex flex-col justify-between p-4 rounded-2xl bg-stone-50/80 hover:bg-amber-50/70 border border-stone-200/70 hover:border-amber-400 transition shadow-2xs hover:shadow-xs"
-                      >
-                        <div>
-                          <div className="text-[11px] font-bold text-amber-800 mb-1">
-                            Ngày {lesson.dayNumber}
-                          </div>
-                          <div className="font-serif font-bold text-stone-900 text-base group-hover:text-amber-900 transition mb-2">
-                            {lesson.titleVi}
-                          </div>
-                          <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
-                            {lesson.subtitleVi}
-                          </p>
-                        </div>
+                    {lessonsOfTopic.map((lesson) => {
+                      const lessonTitle = isVi ? lesson.titleVi : (lesson.titleEn || lesson.titleVi);
+                      const lessonSubtitle = isVi ? lesson.subtitleVi : (lesson.subtitleEn || lesson.subtitleVi);
+                      const dayLabel = isVi
+                        ? `Ngày ${lesson.dayNumber}`
+                        : lang === 'es'
+                        ? `Día ${lesson.dayNumber}`
+                        : lang === 'fr'
+                        ? `Jour ${lesson.dayNumber}`
+                        : `Day ${lesson.dayNumber}`;
 
-                        <div className="mt-4 pt-3 border-t border-stone-200/60 flex items-center justify-between text-[11px] font-semibold text-amber-800">
-                          <span>{lesson.scriptures.length} Câu gốc đối chiếu</span>
-                          <span className="group-hover:translate-x-1 transition-transform">→</span>
-                        </div>
-                      </Link>
-                    ))}
+                      return (
+                        <Link
+                          key={lesson.id}
+                          href={`/${lang}/bai-hoc/can-ban/${lesson.id}`}
+                          className="group flex flex-col justify-between p-4 rounded-2xl bg-stone-50/80 hover:bg-amber-50/70 border border-stone-200/70 hover:border-amber-400 transition shadow-2xs hover:shadow-xs"
+                        >
+                          <div>
+                            <div className="text-[11px] font-bold text-amber-800 mb-1">
+                              {dayLabel}
+                            </div>
+                            <div className="font-serif font-bold text-stone-900 text-base group-hover:text-amber-900 transition mb-2">
+                              {lessonTitle}
+                            </div>
+                            <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
+                              {lessonSubtitle}
+                            </p>
+                          </div>
+
+                          <div className="mt-4 pt-3 border-t border-stone-200/60 flex items-center justify-between text-[11px] font-semibold text-amber-800">
+                            <span>
+                              {lesson.scriptures.length}{' '}
+                              {isVi ? 'Câu gốc đối chiếu' : 'Scriptures'}
+                            </span>
+                            <span className="group-hover:translate-x-1 transition-transform">→</span>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -156,19 +184,22 @@ export default async function LocalizedLessonsPage({ params }: PageProps) {
           <div className="mb-8">
             <div className="flex items-center gap-2 text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
               <span>👑</span>
-              <span>Lộ Trình Nâng Cao • 16 Bài Chuyển Hóa</span>
+              <span>{ht.track2Badge} • {ht.track2Focus}</span>
             </div>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900 mb-3">
-              Bản Đồ Tâm Linh: Đối Thoại
+              {ht.track2Title}
             </h2>
             <p className="text-stone-600 text-sm sm:text-base max-w-3xl leading-relaxed">
-              Trích xuất từ kiệt tác <em>Đối Thoại</em> của Thánh Catarina Siena (Tiến sĩ Hội Thánh, Lm. Vinhsơn Bùi Đức Sinh dịch). Lời Chúa Cha trực tiếp mạc khải về bản tính con người, chiếc cầu Chúa Kitô và con đường tình yêu trọn hảo.
+              {ht.track2Desc}
             </p>
           </div>
 
           <div className="space-y-8">
             {dialogueStages.map((stage) => {
               const lessonsOfStage = dialogueLessons.filter((l) => l.stageId === stage.id);
+              const stageTitle = isVi ? stage.titleVi : (stage.titleEn || stage.titleVi);
+              const stageDesc = isVi ? stage.descriptionVi : (stage.descriptionEn || stage.descriptionVi);
+              const stagePrefix = isVi ? 'Chặng' : (lang === 'es' ? 'Etapa' : (lang === 'fr' ? 'Étape' : 'Stage'));
 
               return (
                 <div
@@ -179,37 +210,46 @@ export default async function LocalizedLessonsPage({ params }: PageProps) {
                     <span className="text-3xl">{stage.iconEmoji}</span>
                     <div>
                       <h3 className="font-serif text-xl sm:text-2xl font-bold text-amber-50">
-                        Chặng {stage.stageNumber}: {stage.titleVi}
+                        {stagePrefix} {stage.stageNumber}: {stageTitle}
                       </h3>
-                      <p className="text-xs text-amber-200/80">{stage.descriptionVi}</p>
+                      <p className="text-xs text-amber-200/80">{stageDesc}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {lessonsOfStage.map((lesson) => (
-                      <Link
-                        key={lesson.id}
-                        href={`/${lang}/bai-hoc/nang-cao/${lesson.id}`}
-                        className="group flex flex-col justify-between p-4 rounded-2xl bg-black/25 hover:bg-black/45 border border-amber-500/20 hover:border-amber-400 transition"
-                      >
-                        <div>
-                          <div className="text-[11px] font-bold text-amber-300 mb-1">
-                            Bài {lesson.lessonNumber}
-                          </div>
-                          <div className="font-serif font-bold text-amber-50 text-base group-hover:text-amber-200 transition mb-2">
-                            {lesson.titleVi}
-                          </div>
-                          <p className="text-xs text-stone-400 line-clamp-2 leading-relaxed">
-                            {lesson.subtitleVi}
-                          </p>
-                        </div>
+                    {lessonsOfStage.map((lesson) => {
+                      const lessonTitle = isVi ? lesson.titleVi : (lesson.titleEn || lesson.titleVi);
+                      const lessonSubtitle = isVi ? lesson.subtitleVi : (lesson.subtitleEn || lesson.subtitleVi);
+                      const lessonPrefix = isVi ? 'Bài' : (lang === 'es' ? 'Lección' : (lang === 'fr' ? 'Leçon' : 'Lesson'));
 
-                        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-semibold text-amber-300">
-                          <span>{lesson.scriptures.length} Câu gốc minh họa</span>
-                          <span className="group-hover:translate-x-1 transition-transform">→</span>
-                        </div>
-                      </Link>
-                    ))}
+                      return (
+                        <Link
+                          key={lesson.id}
+                          href={`/${lang}/bai-hoc/nang-cao/${lesson.id}`}
+                          className="group flex flex-col justify-between p-4 rounded-2xl bg-black/25 hover:bg-black/45 border border-amber-500/20 hover:border-amber-400 transition"
+                        >
+                          <div>
+                            <div className="text-[11px] font-bold text-amber-300 mb-1">
+                              {lessonPrefix} {lesson.lessonNumber}
+                            </div>
+                            <div className="font-serif font-bold text-amber-50 text-base group-hover:text-amber-200 transition mb-2">
+                              {lessonTitle}
+                            </div>
+                            <p className="text-xs text-stone-400 line-clamp-2 leading-relaxed">
+                              {lessonSubtitle}
+                            </p>
+                          </div>
+
+                          <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-semibold text-amber-300">
+                            <span>
+                              {lesson.scriptures.length}{' '}
+                              {isVi ? 'Câu gốc minh họa' : 'Scriptures'}
+                            </span>
+                            <span className="group-hover:translate-x-1 transition-transform">→</span>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               );

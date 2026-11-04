@@ -41,6 +41,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   });
 
+  // Multilingual lessons list pages
+  for (const lang of langKeys) {
+    if (lang !== 'vi') {
+      sitemapEntries.push({
+        url: `${BASE_URL}/${lang}/bai-hoc`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.85,
+      });
+    }
+  }
+
   const devLessons = getAllDevotionalLessons();
   for (const lesson of devLessons) {
     sitemapEntries.push({

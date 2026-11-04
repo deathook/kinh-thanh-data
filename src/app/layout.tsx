@@ -16,8 +16,73 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Thánh Kinh v1.1.0 & 31 Bài Học Tâm Linh | 12 Ngôn Ngữ Trực Tuyến',
-  description: 'Nền tảng đọc Kinh Thánh 12 ngôn ngữ thế giới và 31 bài học chuyển hóa tâm thức trực tuyến.',
+  metadataBase: new URL('https://kinhthanh.khoahoctamlinh.vn'),
+  title: {
+    default: 'Thánh Kinh v1.1.0 & 31 Bài Học Tâm Linh | 12 Ngôn Ngữ Trực Tuyến',
+    template: '%s | Thánh Kinh & Cầu Nguyện',
+  },
+  description: 'Nền tảng đọc Kinh Thánh 12 ngôn ngữ thế giới (Bản Truyền Thống 1925, Berean Standard Bible,...) và 31 bài học chuyển hóa tâm thức trực tuyến với âm thanh giọng đọc TTS bản xứ.',
+  keywords: [
+    'Thánh Kinh',
+    'Kinh Thánh',
+    'Holy Bible',
+    'Kinh Thánh 1925',
+    'Berean Standard Bible',
+    'Đọc Kinh Thánh online',
+    'Kinh Thánh có giọng đọc',
+    '31 bài học tâm linh',
+    'Thánh Catarina Siena',
+    'Tải app Kinh Thánh APK',
+  ],
+  authors: [{ name: 'Thánh Kinh & Cầu Nguyện' }],
+  creator: 'Thánh Kinh & Cầu Nguyện',
+  publisher: 'Thánh Kinh & Cầu Nguyện',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+  openGraph: {
+    title: 'Thánh Kinh v1.1.0 & 31 Bài Học Tâm Linh | 12 Ngôn Ngữ Trực Tuyến',
+    description: 'Nền tảng đọc Kinh Thánh 12 ngôn ngữ thế giới, hỗ trợ đọc thành tiếng và 31 bài học chuyển hóa tâm thức.',
+    url: 'https://kinhthanh.khoahoctamlinh.vn',
+    siteName: 'Thánh Kinh & Cầu Nguyện',
+    locale: 'vi_VN',
+    type: 'website',
+    images: [
+      {
+        url: '/images/feature-graphic.png',
+        width: 1024,
+        height: 500,
+        alt: 'Thánh Kinh & Cầu Nguyện',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Thánh Kinh v1.1.0 & 31 Bài Học Tâm Linh',
+    description: 'Nền tảng đọc Kinh Thánh 12 ngôn ngữ thế giới, hỗ trợ đọc thành tiếng và 31 bài học chuyển hóa tâm thức.',
+    images: ['/images/feature-graphic.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google2e3774e741a3d322',
+  },
 };
 
 export default function RootLayout({

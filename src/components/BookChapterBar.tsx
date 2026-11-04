@@ -26,6 +26,45 @@ export default function BookChapterBar({
   const router = useRouter();
   const t = getTranslation(lang);
 
+  const isVi = lang === 'vi';
+  const isEs = lang === 'es';
+
+  const selectBookModalTitle = isVi
+    ? 'Chọn Sách Kinh Thánh (Trọn Bộ 66 Cuốn)'
+    : isEs
+    ? 'Seleccionar Libro (66 Libros)'
+    : `${t.all66Books}`;
+
+  const selectBookModalSub = isVi
+    ? 'Từ Sáng thế Ký (#1) đến Khải huyền (#66)'
+    : isEs
+    ? 'De Génesis (#1) a Apocalipsis (#66)'
+    : 'All Old & New Testament Books (#1 - #66)';
+
+  const searchPlaceholder = isVi
+    ? 'Tìm sách trong 66 cuốn (ví dụ: Giăng, Khải huyền, Ma-thi-ơ...)'
+    : isEs
+    ? 'Buscar libro (ej. Juan, Apocalipsis, Mateo...)'
+    : 'Search books (e.g. John, Revelation, Matthew...)';
+
+  const noBooksFound = isVi
+    ? `Không tìm thấy sách nào phù hợp với "${searchQuery}"`
+    : isEs
+    ? `No se encontró ningún libro para "${searchQuery}"`
+    : `No books found matching "${searchQuery}"`;
+
+  const selectChapterTitle = isVi
+    ? `${currentBook.name} — Chọn Chương`
+    : isEs
+    ? `${currentBook.name} — Seleccionar Capítulo`
+    : `${currentBook.name} — ${t.chapter}`;
+
+  const selectChapterSub = isVi
+    ? `Tổng cộng có ${currentBook.chapters} chương`
+    : isEs
+    ? `Total de ${currentBook.chapters} capítulos`
+    : `${currentBook.chapters} chapters`;
+
   // Unified 66 books search filter without OT/NT split
   const filteredBooks = allBooks.filter((b) => {
     const q = searchQuery.toLowerCase().trim();
@@ -65,7 +104,7 @@ export default function BookChapterBar({
             setIsChapterModalOpen(false);
           }}
           className="inline-flex items-center gap-2 bg-stone-100 hover:bg-amber-100/70 border border-stone-300 text-stone-900 font-serif font-bold text-sm sm:text-base px-3.5 py-2 rounded-xl transition cursor-pointer shadow-2xs"
-          title="Chọn sách trong 66 cuốn Kinh Thánh"
+          title={selectBookModalTitle}
         >
           <span>📖</span>
           <span className="truncate max-w-[150px] sm:max-w-[200px]">{currentBook.name}</span>
@@ -79,7 +118,7 @@ export default function BookChapterBar({
             setIsBookModalOpen(false);
           }}
           className="inline-flex items-center gap-1.5 bg-amber-800 hover:bg-amber-900 text-white font-sans font-bold text-sm px-3.5 py-2 rounded-xl transition cursor-pointer shadow-2xs"
-          title="Chọn chương"
+          title={selectChapterTitle}
         >
           <span>
             {t.chapter} {currentChapter}
@@ -105,7 +144,7 @@ export default function BookChapterBar({
           <Link
             href={`/${lang}/kinh-thanh/${currentBook.slug}/${currentChapter - 1}`}
             className="w-9 h-9 rounded-xl border border-stone-300 hover:border-amber-400 bg-white hover:bg-stone-50 flex items-center justify-center text-stone-700 font-bold text-sm transition shadow-2xs"
-            title="Chương trước"
+            title={`${t.prevChapter} ${currentChapter - 1}`}
           >
             ←
           </Link>
@@ -119,7 +158,7 @@ export default function BookChapterBar({
           <Link
             href={`/${lang}/kinh-thanh/${currentBook.slug}/${currentChapter + 1}`}
             className="w-9 h-9 rounded-xl border border-stone-300 hover:border-amber-400 bg-white hover:bg-stone-50 flex items-center justify-center text-stone-700 font-bold text-sm transition shadow-2xs"
-            title="Chương tiếp"
+            title={`${t.nextChapter} ${currentChapter + 1}`}
           >
             →
           </Link>
@@ -131,7 +170,7 @@ export default function BookChapterBar({
       </div>
 
       {/* ========================================================= */}
-      {/* MODAL 1: CHỌN SÁCH (GOM TRỌN BỘ 66 SÁCH - KHÔNG CHIA TAB) */}
+      {/* MODAL 1: CHỌN SÁCH (GOM TRỌN BỘ 66 SÁCH) */}
       {/* ========================================================= */}
       {isBookModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
@@ -140,10 +179,10 @@ export default function BookChapterBar({
             <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between">
               <div>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
-                  Chọn Sách Kinh Thánh (Trọn Bộ 66 Cuốn)
+                  {selectBookModalTitle}
                 </h3>
                 <p className="text-xs text-stone-500">
-                  Từ Sáng thế Ký (#1) đến Khải huyền (#66)
+                  {selectBookModalSub}
                 </p>
               </div>
               <button
@@ -158,7 +197,7 @@ export default function BookChapterBar({
             <div className="p-4 border-b border-stone-100 bg-stone-50/70">
               <input
                 type="text"
-                placeholder="Tìm sách trong 66 cuốn (ví dụ: Khải huyền, Giăng, Sáng thế ký, Ma-thi-ơ...)"
+                placeholder={searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-white border border-stone-300 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-amber-700 shadow-2xs"
@@ -201,7 +240,7 @@ export default function BookChapterBar({
 
               {filteredBooks.length === 0 && (
                 <div className="text-center py-8 text-stone-400 text-sm">
-                  Không tìm thấy sách nào phù hợp với &quot;{searchQuery}&quot;
+                  {noBooksFound}
                 </div>
               )}
             </div>
@@ -219,10 +258,10 @@ export default function BookChapterBar({
             <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between">
               <div>
                 <h3 className="font-serif font-bold text-lg text-stone-900">
-                  {currentBook.name} — Chọn Chương
+                  {selectChapterTitle}
                 </h3>
                 <p className="text-xs text-stone-500">
-                  Tổng cộng có {currentBook.chapters} chương
+                  {selectChapterSub}
                 </p>
               </div>
               <button

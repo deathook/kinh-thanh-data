@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getAllBooks } from '@/lib/bible';
-import { isValidLang, getLangConfig, getTranslation, SUPPORTED_LANGUAGES } from '@/lib/i18n';
+import { isValidLang, getLangConfig, getTranslation } from '@/lib/i18n';
+import { getHomeTranslation } from '@/lib/homeI18n';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SmartAppBanner from '@/components/SmartAppBanner';
@@ -21,8 +22,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const t = getTranslation(lang);
 
   return {
-    title: `${t.readBible} - 66 Sách Kinh Thánh (${cfg.bibleName})`,
-    description: `Khám phá và đọc trọn bộ 66 sách Cựu Ước và Tân Ước (từ Sáng thế Ký đến Khải Huyền) bản dịch ${cfg.bibleName} với giọng đọc trực tuyến.`,
+    title: `${t.readBible} - ${t.all66Books} (${cfg.bibleName})`,
+    description: `${t.readBible} ${cfg.bibleName} - ${cfg.localName}. ${t.oldTestament} & ${t.newTestament}.`,
   };
 }
 
@@ -35,10 +36,14 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
   const books = getAllBooks(lang);
   const cfg = getLangConfig(lang);
   const t = getTranslation(lang);
+  const ht = getHomeTranslation(lang);
 
-  // Chronological Biblical order: Cựu Ước (OT) first, Tân Ước (NT) second
   const oldTestament = books.filter((b) => b.testament === 'OT');
   const newTestament = books.filter((b) => b.testament === 'NT');
+
+  const readNowLabel = lang === 'vi' ? 'Đọc ngay →' : (lang === 'es' ? 'Leer ahora →' : (lang === 'fr' ? 'Lire maintenant →' : 'Read now →'));
+  const part1Label = lang === 'vi' ? 'Phần 1' : (lang === 'es' ? 'Parte 1' : (lang === 'fr' ? 'Partie 1' : 'Part 1'));
+  const part2Label = lang === 'vi' ? 'Phần 2' : (lang === 'es' ? 'Parte 2' : (lang === 'fr' ? 'Partie 2' : 'Part 2'));
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col font-sans">
@@ -50,15 +55,15 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-900 text-xs font-bold px-3.5 py-1.5 rounded-full mb-4 shadow-2xs">
             <span>{cfg.flag}</span>
-            <span>{cfg.bibleName} • Trọn Bộ 66 Sách</span>
+            <span>{cfg.bibleName} • {t.all66Books}</span>
           </div>
 
           <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-stone-900 tracking-tight leading-tight mb-3">
-            {t.readBible} Trực Tuyến
+            {t.readBible} ({cfg.localName})
           </h1>
 
           <p className="text-stone-600 text-sm sm:text-base max-w-xl mx-auto leading-relaxed mb-6">
-            Chọn bất kỳ sách nào dưới đây để bắt đầu đọc và nghe âm thanh giọng đọc bản xứ.
+            {ht.libraryDesc}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-semibold">
@@ -66,13 +71,13 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
               href="#cuu-uoc"
               className="bg-white hover:bg-stone-50 text-stone-800 border border-stone-300 px-4 py-2 rounded-full shadow-2xs transition"
             >
-              📜 Cựu Ước (39 Sách)
+              📜 {t.oldTestament} ({oldTestament.length})
             </a>
             <a
               href="#tan-uoc"
               className="bg-amber-800 hover:bg-amber-900 text-white px-4 py-2 rounded-full shadow-xs transition"
             >
-              ✝️ Tân Ước (27 Sách • Đến Khải Huyền)
+              ✝️ {t.newTestament} ({newTestament.length})
             </a>
           </div>
         </div>
@@ -80,19 +85,19 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-12 space-y-14">
         {/* ========================================================= */}
-        {/* 1. CỰU ƯỚC (39 SÁCH) - ĐƯỢC ĐẶT ĐẦU TIÊN THEO ĐÚNG THỨ TỰ */}
+        {/* 1. CỰU ƯỚC (39 SÁCH) */}
         {/* ========================================================= */}
         <section id="cuu-uoc" className="scroll-mt-20">
           <div className="flex items-center justify-between mb-5 border-b-2 border-stone-300 pb-2.5">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
-                Phần 1
+                {part1Label}
               </span>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900">
-                {t.oldTestament} <span className="text-sm font-sans font-normal text-stone-500">(39 Sách)</span>
+                {t.oldTestament} <span className="text-sm font-sans font-normal text-stone-500">({oldTestament.length})</span>
               </h2>
             </div>
-            <span className="text-xs text-stone-500">Từ Sáng thế Ký đến Ma-la-chi</span>
+            <span className="text-xs text-stone-500">{ht.oldTestamentCount}</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -112,7 +117,7 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
                   </div>
                 </div>
                 <div className="text-[11px] font-semibold text-amber-800 opacity-0 group-hover:opacity-100 transition-opacity mt-2">
-                  Đọc ngay →
+                  {readNowLabel}
                 </div>
               </Link>
             ))}
@@ -120,19 +125,19 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
         </section>
 
         {/* ========================================================= */}
-        {/* 2. TÂN ƯỚC (27 SÁCH) - KẾT THÚC VỚI KHẢI HUYỀN */}
+        {/* 2. TÂN ƯỚC (27 SÁCH) */}
         {/* ========================================================= */}
         <section id="tan-uoc" className="scroll-mt-20">
           <div className="flex items-center justify-between mb-5 border-b-2 border-amber-800/40 pb-2.5">
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
-                Phần 2
+                {part2Label}
               </span>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900">
-                {t.newTestament} <span className="text-sm font-sans font-normal text-stone-500">(27 Sách)</span>
+                {t.newTestament} <span className="text-sm font-sans font-normal text-stone-500">({newTestament.length})</span>
               </h2>
             </div>
-            <span className="text-xs text-amber-800 font-semibold">Từ Ma-thi-ơ đến Khải Huyền</span>
+            <span className="text-xs text-amber-800 font-semibold">{ht.newTestamentCount}</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -156,7 +161,7 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
                       </span>
                       {isRev && (
                         <span className="bg-amber-700 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full shrink-0">
-                          Sách cuối
+                          {ht.book66Badge}
                         </span>
                       )}
                     </div>
@@ -166,7 +171,7 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
                     </div>
                   </div>
                   <div className="text-[11px] font-semibold text-amber-800 opacity-0 group-hover:opacity-100 transition-opacity mt-2">
-                    Đọc ngay →
+                    {readNowLabel}
                   </div>
                 </Link>
               );

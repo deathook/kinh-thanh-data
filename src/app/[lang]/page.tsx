@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import HomePageView from '@/components/HomePageView';
 import { isValidLang, getLangConfig, getTranslation, SUPPORTED_LANGUAGES } from '@/lib/i18n';
+import { getHomeTranslation } from '@/lib/homeI18n';
 
 interface PageProps {
   params: Promise<{
@@ -15,6 +16,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const cfg = getLangConfig(lang);
   const t = getTranslation(lang);
+  const ht = getHomeTranslation(lang);
   const baseUrl = 'https://kinhthanh.khoahoctamlinh.vn';
 
   const languagesObj: Record<string, string> = {};
@@ -22,12 +24,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     languagesObj[code] = code === 'vi' ? baseUrl : `${baseUrl}/${code}`;
   }
 
+  const title = `${t.siteTitle} - ${cfg.bibleName} | ${ht.heroHeadline1}`;
+  const description = ht.heroDesc;
+
   return {
-    title: `${t.siteTitle} - ${cfg.bibleName} | 12 Ngôn Ngữ Trực Tuyến`,
-    description: `Khám phá Kinh Thánh 66 cuốn (${cfg.bibleName}) và 31 bài học tâm linh trực tuyến với giọng đọc TTS bản xứ.`,
+    title,
+    description,
     alternates: {
       canonical: lang === 'vi' ? baseUrl : `${baseUrl}/${lang}`,
       languages: languagesObj,
+    },
+    openGraph: {
+      title,
+      description,
+      url: lang === 'vi' ? baseUrl : `${baseUrl}/${lang}`,
+      siteName: t.siteTitle,
+      locale: cfg.voiceLang.replace('-', '_'),
+      images: [
+        {
+          url: '/images/feature-graphic.png',
+          width: 1024,
+          height: 500,
+          alt: t.siteTitle,
+        },
+      ],
     },
   };
 }

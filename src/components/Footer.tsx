@@ -1,13 +1,30 @@
 import Link from 'next/link';
+import { getHomeTranslation } from '@/lib/homeI18n';
+import { getTranslation, getLangConfig } from '@/lib/i18n';
+import { getCanonicalSlug } from '@/lib/bible';
 
 interface FooterProps {
   currentLang?: string;
 }
 
 export default function Footer({ currentLang = 'vi' }: FooterProps) {
+  const t = getTranslation(currentLang);
+  const cfg = getLangConfig(currentLang);
+  const ht = getHomeTranslation(currentLang);
+
   const homeLink = currentLang === 'vi' ? '/' : `/${currentLang}`;
   const lessonsLink = `/${currentLang}/bai-hoc`;
   const bibleLink = `/${currentLang}/kinh-thanh`;
+
+  const johnSlug = getCanonicalSlug(43, currentLang);
+  const psalmSlug = getCanonicalSlug(19, currentLang);
+  const mattSlug = getCanonicalSlug(40, currentLang);
+  const genSlug = getCanonicalSlug(1, currentLang);
+
+  // Friendly verse titles per language
+  const psalmTitle = currentLang === 'vi' ? 'Thi thiên 23' : (currentLang === 'es' ? 'Salmos 23' : (currentLang === 'fr' ? 'Psaume 23' : (currentLang === 'pt' ? 'Salmos 23' : (currentLang === 'de' ? 'Psalm 23' : 'Psalm 23'))));
+  const mattTitle = currentLang === 'vi' ? 'Ma-thi-ơ 5' : (currentLang === 'es' ? 'Mateo 5' : (currentLang === 'fr' ? 'Matthieu 5' : (currentLang === 'pt' ? 'Mateus 5' : (currentLang === 'de' ? 'Matthäus 5' : 'Matthew 5'))));
+  const genTitle = currentLang === 'vi' ? 'Sáng thế Ký 1' : (currentLang === 'es' ? 'Génesis 1' : (currentLang === 'fr' ? 'Genèse 1' : (currentLang === 'pt' ? 'Gênesis 1' : (currentLang === 'de' ? '1. Mose 1' : 'Genesis 1'))));
 
   return (
     <footer className="bg-stone-950 text-stone-300 pt-16 pb-12 border-t border-stone-800">
@@ -18,14 +35,14 @@ export default function Footer({ currentLang = 'vi' }: FooterProps) {
             <div className="flex items-center gap-2 mb-3">
               <span className="text-2xl">✝️</span>
               <span className="font-serif font-bold text-white text-lg">
-                Thánh Kinh & Cầu Nguyện
+                {t.siteTitle}
               </span>
             </div>
             <p className="text-xs text-stone-400 leading-relaxed mb-4">
-              Dự án phi lợi nhuận lan tỏa Lời Chúa và tri thức tâm thức chuyển hóa. Cung cấp trọn bộ 66 sách Kinh Thánh song ngữ và 31 bài học rèn luyện nội tâm.
+              {ht.footerAbout}
             </p>
             <div className="text-[11px] text-amber-400/90 font-medium">
-              ✨ 100% Miễn phí • Không quảng cáo • Tôn vinh Chúa
+              {ht.footerMotto}
             </div>
           </div>
 
@@ -33,32 +50,32 @@ export default function Footer({ currentLang = 'vi' }: FooterProps) {
           <div>
             <h4 className="font-semibold text-white text-sm mb-3 flex items-center gap-1.5">
               <span>🌱</span>
-              <span>31 Bài Học Tâm Linh</span>
+              <span>{ht.footerLessonsCol}</span>
             </h4>
             <ul className="text-xs space-y-2 text-stone-400">
               <li>
-                <Link href="/vi/bai-hoc#can-ban" className="hover:text-amber-400 transition">
-                  • 15 Bài Căn Bản (Góc Suy Gẫm)
+                <Link href={`${lessonsLink}#can-ban`} className="hover:text-amber-400 transition">
+                  • {ht.track1Badge}
                 </Link>
               </li>
               <li>
-                <Link href="/vi/bai-hoc#nang-cao" className="hover:text-amber-400 transition">
-                  • 16 Bài Nâng Cao (Lời Chúa Cha)
+                <Link href={`${lessonsLink}#nang-cao`} className="hover:text-amber-400 transition">
+                  • {ht.track2Badge}
                 </Link>
               </li>
               <li>
-                <Link href="/vi/bai-hoc/can-ban/self_love_1" className="hover:text-amber-400 transition">
-                  • Bài 1: Đền Thờ Của Thánh Linh
+                <Link href={`/${currentLang}/bai-hoc/can-ban/self_love_1`} className="hover:text-amber-400 transition">
+                  • {ht.track1Title}
                 </Link>
               </li>
               <li>
-                <Link href="/vi/bai-hoc/nang-cao/stage1_cell_of_self_knowledge_1" className="hover:text-amber-400 transition">
-                  • Bài 1: Khởi Đầu Tự Biết Mình
+                <Link href={`/${currentLang}/bai-hoc/nang-cao/stage1_cell_of_self_knowledge_1`} className="hover:text-amber-400 transition">
+                  • {ht.track2Title}
                 </Link>
               </li>
               <li>
-                <Link href="/vi/bai-hoc" className="text-amber-400 hover:underline">
-                  → Xem toàn bộ 31 bài học
+                <Link href={lessonsLink} className="text-amber-400 hover:underline">
+                  → {ht.lessonsViewAll}
                 </Link>
               </li>
             </ul>
@@ -68,32 +85,32 @@ export default function Footer({ currentLang = 'vi' }: FooterProps) {
           <div>
             <h4 className="font-semibold text-white text-sm mb-3 flex items-center gap-1.5">
               <span>📖</span>
-              <span>Đọc Kinh Thánh Song Ngữ</span>
+              <span>{ht.footerBibleCol} ({cfg.localName})</span>
             </h4>
             <ul className="text-xs space-y-2 text-stone-400">
               <li>
-                <Link href="/vi/kinh-thanh/giang/3" className="hover:text-amber-400 transition">
-                  • Giăng 3 (Vì Đức Chúa Trời yêu thương...)
+                <Link href={`/${currentLang}/kinh-thanh/${johnSlug}/3`} className="hover:text-amber-400 transition">
+                  • {ht.featuredVerseRef}
                 </Link>
               </li>
               <li>
-                <Link href="/vi/kinh-thanh/thi-thien/23" className="hover:text-amber-400 transition">
-                  • Thi thiên 23 (Đức Giê-hô-va là Đấng chăn giữ)
+                <Link href={`/${currentLang}/kinh-thanh/${psalmSlug}/23`} className="hover:text-amber-400 transition">
+                  • {psalmTitle}
                 </Link>
               </li>
               <li>
-                <Link href="/vi/kinh-thanh/ma-thi-o/5" className="hover:text-amber-400 transition">
-                  • Ma-thi-ơ 5 (Bài Giảng Trên Núi)
+                <Link href={`/${currentLang}/kinh-thanh/${mattSlug}/5`} className="hover:text-amber-400 transition">
+                  • {mattTitle}
                 </Link>
               </li>
               <li>
-                <Link href="/vi/kinh-thanh/sang-the-ky/1" className="hover:text-amber-400 transition">
-                  • Sáng thế Ký 1 (Khởi nguyên sáng tạo)
+                <Link href={`/${currentLang}/kinh-thanh/${genSlug}/1`} className="hover:text-amber-400 transition">
+                  • {genTitle}
                 </Link>
               </li>
               <li>
-                <Link href="/en/bible/john/3" className="hover:text-amber-400 transition">
-                  • Berean Standard Bible (BSB English)
+                <Link href={bibleLink} className="text-amber-400 hover:underline">
+                  → {t.all66Books}
                 </Link>
               </li>
             </ul>
@@ -103,21 +120,21 @@ export default function Footer({ currentLang = 'vi' }: FooterProps) {
           <div id="download-app">
             <h4 className="font-semibold text-white text-sm mb-3 flex items-center gap-1.5">
               <span>📱</span>
-              <span>Ứng Dụng Thánh Kinh v1.1.0</span>
+              <span>{ht.footerAppCol}</span>
             </h4>
             <p className="text-xs text-stone-400 mb-4 leading-relaxed">
-              Trải nghiệm toàn diện trên thiết bị di động: Đọc offline 12 ngôn ngữ, tra cứu siêu tốc, sổ tay ghi chú & báo thức cầu nguyện.
+              {ht.footerAppDesc}
             </p>
             <a
               href="/app-release.apk"
               download="KinhThanh_v1.1.0.apk"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-800 hover:from-amber-500 hover:to-amber-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all border border-amber-500/40"
             >
-              <span>Tải file APK (57.1 MB)</span>
+              <span>{ht.footerAppBtn}</span>
               <span>↓</span>
             </a>
             <div className="text-[10px] text-stone-500 mt-2">
-              Hỗ trợ Android 7.0 trở lên • An toàn 100%
+              {ht.footerAppSub}
             </div>
           </div>
         </div>
@@ -125,16 +142,16 @@ export default function Footer({ currentLang = 'vi' }: FooterProps) {
         {/* Bản Quyền & Giấy Phép */}
         <div className="pt-8 border-t border-stone-800/80 text-xs text-stone-500 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-center md:text-left">
-            <div>© 2026 Thánh Kinh & Cầu Nguyện. Được phát triển vì cộng đồng tín hữu.</div>
+            <div>{ht.footerCopyright}</div>
             <div className="text-[11px] text-stone-600 mt-0.5">
-              Bản dịch Truyền Thống 1925 (Public Domain) • Berean Standard Bible (BSB Public Domain 2023) • Trích xuất kiệt tác Đối Thoại (Lm. Vinhsơn Bùi Đức Sinh dịch)
+              {cfg.bibleName} • {ht.footerLicense}
             </div>
           </div>
           <div className="flex items-center gap-4 text-xs text-stone-400">
-            <Link href={homeLink} className="hover:text-white transition">Trang chủ</Link>
-            <Link href={lessonsLink} className="hover:text-white transition">Bài học</Link>
-            <Link href={bibleLink} className="hover:text-white transition">Kinh Thánh</Link>
-            <a href="/app-release.apk" download className="hover:text-amber-400 transition">Tải APK</a>
+            <Link href={homeLink} className="hover:text-white transition">{t.home}</Link>
+            <Link href={lessonsLink} className="hover:text-white transition">{t.lessons}</Link>
+            <Link href={bibleLink} className="hover:text-white transition">{t.readBible}</Link>
+            <a href="/app-release.apk" download className="hover:text-amber-400 transition">{t.downloadApp}</a>
           </div>
         </div>
       </div>

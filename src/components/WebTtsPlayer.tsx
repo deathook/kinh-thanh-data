@@ -306,11 +306,11 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
               setSpeechRate(val);
             }}
             className="bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-3 py-2 outline-none focus:border-amber-700 transition cursor-pointer font-medium shadow-2xs"
-            title="Tốc độ đọc / Speech rate"
+            title="Speed"
           >
             <option value="0.5">0.5x</option>
             <option value="0.75">0.75x</option>
-            <option value="1">1x (Chuẩn)</option>
+            <option value="1">1.0x</option>
             <option value="1.5">1.5x</option>
             <option value="2">2.0x</option>
           </select>

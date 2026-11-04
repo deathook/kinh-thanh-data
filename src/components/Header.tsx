@@ -18,13 +18,15 @@ export default function Header({
   const t = getTranslation(currentLang);
   const cfg = getLangConfig(currentLang);
 
+  const homeLink = currentLang === 'vi' ? '/' : `/${currentLang}`;
   const bibleLink = `/${currentLang}/kinh-thanh`;
+  const lessonsLink = `/${currentLang}/bai-hoc`;
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-2xs">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Brand Logo & Name */}
-        <Link href="/" className="flex items-center gap-2.5 group">
+        <Link href={homeLink} className="flex items-center gap-2.5 group">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-800 to-stone-900 flex items-center justify-center text-white text-xl shadow-xs group-hover:scale-105 transition-transform">
             ✝️
           </div>
@@ -41,7 +43,7 @@ export default function Header({
         {/* Navigation Bar */}
         <nav className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-medium">
           <Link
-            href="/vi/bai-hoc"
+            href={lessonsLink}
             className="text-stone-700 hover:text-amber-800 transition-colors flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-stone-100"
           >
             <span>{t.lessons}</span>

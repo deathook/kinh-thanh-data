@@ -125,7 +125,7 @@ export default async function MultilingualChapterPage({ params }: PageProps) {
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
         {/* Breadcrumb Navigation */}
         <nav className="text-xs text-stone-500 mb-4 flex items-center gap-1.5 flex-wrap">
-          <Link href="/" className="hover:text-amber-800 transition-colors">
+          <Link href={lang === 'vi' ? '/' : `/${lang}`} className="hover:text-amber-800 transition-colors">
             {t.home}
           </Link>
           <span>/</span>
@@ -215,7 +215,7 @@ export default async function MultilingualChapterPage({ params }: PageProps) {
         </div>
       </main>
 
-      <Footer />
+      <Footer currentLang={lang} />
     </div>
   );
 }

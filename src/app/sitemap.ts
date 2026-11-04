@@ -6,7 +6,7 @@ import { getAllDialogueLessons } from '@/lib/dialogueData';
 
 export const revalidate = 86400; // Cache on CDN for 24 hours
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kinh-thanh-red.vercel.app';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kinhthanh.khoahoctamlinh.vn';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const sitemapEntries: MetadataRoute.Sitemap = [];
@@ -19,6 +19,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'daily',
     priority: 1.0,
   });
+
+  // Localized Home Pages for other 11 languages
+  const langKeys = Object.keys(SUPPORTED_LANGUAGES);
+  for (const lang of langKeys) {
+    if (lang !== 'vi') {
+      sitemapEntries.push({
+        url: `${BASE_URL}/${lang}`,
+        lastModified: now,
+        changeFrequency: 'daily',
+        priority: 1.0,
+      });
+    }
+  }
 
   // 2. Lesson List Page & Individual Lessons (31 Bài Học Tâm Linh)
   sitemapEntries.push({
@@ -49,8 +62,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // 3. Bible Library Pages & Chapter Pages for all 12 Languages (14,280 pages)
-  const langKeys = Object.keys(SUPPORTED_LANGUAGES);
-
   for (const lang of langKeys) {
     // Library index page (e.g. /vi/kinh-thanh, /en/kinh-thanh, ...)
     sitemapEntries.push({

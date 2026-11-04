@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { SUPPORTED_LANGUAGES, LANGUAGE_LIST } from '@/lib/i18n';
 
 interface LanguageSwitcherProps {
@@ -20,6 +20,7 @@ export default function LanguageSwitcher({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname() || '/';
 
   const currentConfig = SUPPORTED_LANGUAGES[currentLang] || SUPPORTED_LANGUAGES.vi;
 
@@ -38,19 +39,46 @@ export default function LanguageSwitcher({
     setIsOpen(false);
     if (targetCode === currentLang) return;
 
-    // If on chapter reading page
+    // 1. Persist user choice in localStorage & Cookie
+    try {
+      localStorage.setItem('app_lang', targetCode);
+      document.cookie = `app_lang=${targetCode}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch {}
+
+    // 2. If on chapter reading page with localized slugs
     if (chapter && bookSlugsByLang && bookSlugsByLang[targetCode]) {
       const targetSlug = bookSlugsByLang[targetCode];
       router.push(`/${targetCode}/kinh-thanh/${targetSlug}/${chapter}`);
       return;
     }
 
-    // Default: switch to that language's reading chapter (e.g. John 3) or home
-    if (targetCode === 'vi') {
-      router.push('/vi/kinh-thanh/giang/3');
-    } else {
-      router.push(`/${targetCode}/kinh-thanh/john/3`);
+    // 3. If on Bible library page (/[lang]/kinh-thanh)
+    if (pathname.includes('/kinh-thanh')) {
+      router.push(`/${targetCode}/kinh-thanh`);
+      return;
     }
+
+    // 4. If on lessons page (/bai-hoc)
+    if (pathname.includes('/bai-hoc')) {
+      const newPath = pathname.replace(/^\/[a-z]{2}(\/|$)/, `/${targetCode}$1`);
+      router.push(newPath || `/${targetCode}/bai-hoc`);
+      return;
+    }
+
+    // 5. If on Homepage (/ or /vi or /[lang])
+    if (pathname === '/' || pathname === `/${currentLang}`) {
+      router.push(targetCode === 'vi' ? '/' : `/${targetCode}`);
+      return;
+    }
+
+    // 6. Generic replacement: replace leading /[currentLang]/ with /[targetCode]/
+    if (pathname.startsWith(`/${currentLang}/`)) {
+      router.push(pathname.replace(`/${currentLang}/`, `/${targetCode}/`));
+      return;
+    }
+
+    // 7. Fallback: target home
+    router.push(targetCode === 'vi' ? '/' : `/${targetCode}`);
   };
 
   return (

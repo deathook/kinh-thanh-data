@@ -1,6 +1,14 @@
 import Link from 'next/link';
 
-export default function Footer() {
+interface FooterProps {
+  currentLang?: string;
+}
+
+export default function Footer({ currentLang = 'vi' }: FooterProps) {
+  const homeLink = currentLang === 'vi' ? '/' : `/${currentLang}`;
+  const lessonsLink = `/${currentLang}/bai-hoc`;
+  const bibleLink = `/${currentLang}/kinh-thanh`;
+
   return (
     <footer className="bg-stone-950 text-stone-300 pt-16 pb-12 border-t border-stone-800">
       <div className="max-w-6xl mx-auto px-4">
@@ -123,8 +131,9 @@ export default function Footer() {
             </div>
           </div>
           <div className="flex items-center gap-4 text-xs text-stone-400">
-            <Link href="/" className="hover:text-white transition">Trang chủ</Link>
-            <Link href="/vi/bai-hoc" className="hover:text-white transition">Bài học</Link>
+            <Link href={homeLink} className="hover:text-white transition">Trang chủ</Link>
+            <Link href={lessonsLink} className="hover:text-white transition">Bài học</Link>
+            <Link href={bibleLink} className="hover:text-white transition">Kinh Thánh</Link>
             <a href="/app-release.apk" download className="hover:text-amber-400 transition">Tải APK</a>
           </div>
         </div>

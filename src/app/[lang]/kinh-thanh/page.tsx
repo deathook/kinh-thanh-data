@@ -175,7 +175,7 @@ export default async function BibleDirectoryPage({ params }: PageProps) {
         </section>
       </main>
 
-      <Footer />
+      <Footer currentLang={lang} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import LanguageSwitcher from './LanguageSwitcher';
+import SearchModal from './SearchModal';
 import { getTranslation, getLangConfig } from '@/lib/i18n';
 
 interface HeaderProps {
@@ -58,6 +59,9 @@ export default function Header({
           >
             {t.readBible}
           </Link>
+
+          {/* Instant Scripture Search */}
+          <SearchModal currentLang={currentLang} triggerStyle="header" />
 
           {/* 12-Language Switcher */}
           <LanguageSwitcher

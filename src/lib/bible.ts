@@ -106,9 +106,12 @@ export function getChapterVerses(bookId: number, chapter: number, lang: string =
   return toPlain(rows);
 }
 
-export function searchBible(query: string, lang: string = 'vi', limit: number = 30) {
+export function searchBible(query: string, lang: string = 'vi', limit: number = 40) {
   const db = getBibleDb(lang);
-  const formattedQuery = query.trim().split(' ').map((w) => `"${w}"*`).join(' ');
+  const cleanWords = query.trim().replace(/["'*()]/g, '').split(/\s+/).filter((w) => w.length > 0);
+  if (cleanWords.length === 0) return [];
+
+  const formattedQuery = cleanWords.map((w) => `"${w}"*`).join(' ');
 
   try {
     const sql = `
@@ -122,6 +125,24 @@ export function searchBible(query: string, lang: string = 'vi', limit: number = 
       LIMIT ?
     `;
     const rows = db.prepare(sql).all(formattedQuery, limit);
+    if (rows && rows.length > 0) {
+      return toPlain(rows);
+    }
+  } catch {
+    // If FTS fails, continue to LIKE fallback
+  }
+
+  try {
+    const likeSql = `
+      SELECT 
+        v.id, v.book_id, v.chapter, v.verse, v.text,
+        b.name, b.slug, b.code
+      FROM verses v
+      JOIN books b ON b.id = v.book_id
+      WHERE v.text LIKE ?
+      LIMIT ?
+    `;
+    const rows = db.prepare(likeSql).all(`%${query.trim()}%`, limit);
     return toPlain(rows);
   } catch {
     return [];

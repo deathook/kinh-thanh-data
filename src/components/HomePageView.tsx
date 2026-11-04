@@ -4,6 +4,7 @@ import { getAllBooks, getCanonicalSlug } from '@/lib/bible';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SmartAppBanner from '@/components/SmartAppBanner';
+import SearchModal from '@/components/SearchModal';
 import { getAllDevotionalLessons } from '@/lib/devotionalData';
 import { getAllDialogueLessons } from '@/lib/dialogueData';
 import { getTranslation, getLangConfig } from '@/lib/i18n';
@@ -52,9 +53,14 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
             </span>
           </h1>
 
-          <p className="text-stone-600 text-base sm:text-lg md:text-xl max-w-3xl mx-auto leading-relaxed mb-10">
+          <p className="text-stone-600 text-base sm:text-lg md:text-xl max-w-3xl mx-auto leading-relaxed mb-8">
             {ht.heroDesc}
           </p>
+
+          {/* Hero Instant Search Bar */}
+          <div className="mb-8 max-w-xl mx-auto">
+            <SearchModal currentLang={lang} triggerStyle="hero" />
+          </div>
 
           {/* Primary Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-xl mx-auto mb-12">

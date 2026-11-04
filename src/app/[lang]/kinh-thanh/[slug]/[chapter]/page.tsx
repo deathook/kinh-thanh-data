@@ -19,6 +19,7 @@ import SmartAppBanner from '@/components/SmartAppBanner';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BookChapterBar from '@/components/BookChapterBar';
+import ChapterVersesReader from '@/components/ChapterVersesReader';
 
 interface PageProps {
   params: Promise<{
@@ -167,23 +168,13 @@ export default async function MultilingualChapterPage({ params }: PageProps) {
           lang={lang}
         />
 
-        {/* Verses Reading View - Single Language (Không cần song ngữ) */}
-        <article className="bg-white rounded-3xl shadow-xs border border-stone-200/90 p-6 sm:p-10 my-6 font-serif text-lg leading-relaxed space-y-3">
-          {verses.map((v) => (
-            <div
-              key={v.id}
-              id={`cau-${v.verse}`}
-              className="group hover:bg-amber-50/60 p-2.5 rounded-xl transition-all target:bg-amber-100/90 target:ring-2 target:ring-amber-500 target:rounded-xl scroll-mt-24 flex items-start gap-3"
-            >
-              <span className="verse-num font-sans font-bold text-xs text-amber-800 select-none shrink-0 w-7 text-right pt-1 transition-all">
-                {v.verse}
-              </span>
-              <span className="verse-text text-stone-900 leading-relaxed text-lg sm:text-xl transition-all">
-                {v.text}
-              </span>
-            </div>
-          ))}
-        </article>
+        {/* Interactive Verses Reading View with Highlights */}
+        <ChapterVersesReader
+          verses={verses.map((v) => ({ id: v.id, verse: v.verse, text: v.text }))}
+          lang={lang}
+          bookName={book.name}
+          chapter={chNum}
+        />
 
         {/* Bottom Pagination */}
         <div className="flex items-center justify-between my-8 gap-4">

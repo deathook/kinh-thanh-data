@@ -115,7 +115,7 @@ export default function SearchModal({
 
   const handleSelectResult = (item: SearchResultItem) => {
     setIsOpen(false);
-    router.push(`/${currentLang}/kinh-thanh/${item.slug}/${item.chapter}#cau-${item.verse}`);
+    router.push(`/${currentLang}/kinh-thanh/${item.slug}/${item.chapter}?highlight=${item.verse}#cau-${item.verse}`);
   };
 
   // Highlight matched terms in text

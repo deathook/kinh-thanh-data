@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ScriptureItem } from '@/lib/devotionalData';
 
 export interface LessonContent {
@@ -33,6 +34,10 @@ interface LessonReaderViewProps {
 }
 
 export default function LessonReaderView({ lesson }: LessonReaderViewProps) {
+  const pathname = usePathname() || '/vi';
+  const langMatch = pathname.match(/^\/([a-z]{2})(\/|$)/);
+  const currentLang = langMatch ? langMatch[1] : 'vi';
+
   // Font size: 'base' | 'lg' | 'xl' | '2xl'
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'huge'>('normal');
 
@@ -486,14 +491,23 @@ export default function LessonReaderView({ lesson }: LessonReaderViewProps) {
                     </span>
                   </div>
 
-                  {/* Jump directly to chapter verse in Bible Reader */}
-                  <Link
-                    href={`/vi/kinh-thanh/${s.slugVi}/${s.chapter}#cau-${s.verse}`}
-                    className="inline-flex items-center gap-1 bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-full transition shadow-2xs"
-                  >
-                    <span>Đối chiếu</span>
-                    <span>→</span>
-                  </Link>
+                  {/* Jump directly to chapter verse in Bible Reader with vivid highlight */}
+                  {(() => {
+                    const targetSlug = currentLang === 'en' ? (s.slugEn || s.slugVi) : s.slugVi;
+                    const compareHref = `/${currentLang}/kinh-thanh/${targetSlug}/${s.chapter}?highlight=${s.verse}#cau-${s.verse}`;
+                    const compareLabel = currentLang === 'vi' ? `Đối chiếu câu ${s.verse}` : (currentLang === 'es' ? `Cotejar (v.${s.verse})` : `Cross-ref (v.${s.verse})`);
+                    return (
+                      <Link
+                        href={compareHref}
+                        className="inline-flex items-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-full transition shadow-2xs hover:shadow-xs group"
+                        title={currentLang === 'vi' ? `Xem câu ${s.verse} trong toàn bộ chương ${s.chapter}` : `View verse ${s.verse}`}
+                      >
+                        <span>🔍</span>
+                        <span>{compareLabel}</span>
+                        <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                      </Link>
+                    );
+                  })()}
                 </div>
 
                 <blockquote className={`font-serif text-stone-800 leading-relaxed mb-3 ${contentFontClass}`}>

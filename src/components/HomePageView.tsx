@@ -351,7 +351,7 @@ export default function HomePageView({ lang = 'vi' }: HomePageViewProps) {
             <div className="flex items-center justify-between pt-4 border-t border-stone-200">
               <span className="text-sm font-bold text-stone-800">{ht.featuredVerseRef}</span>
               <Link
-                href={`${john3Link}#cau-16`}
+                href={`${john3Link}?highlight=16#cau-16`}
                 className="text-xs sm:text-sm font-bold text-amber-800 hover:text-amber-900 hover:underline inline-flex items-center gap-1.5"
               >
                 <span>{ht.featuredVerseReadCh}</span>

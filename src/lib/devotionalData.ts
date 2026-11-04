@@ -1,0 +1,672 @@
+export interface ScriptureItem {
+  bookId: number;
+  slugVi: string;
+  slugEn: string;
+  chapter: number;
+  verse: number;
+  refVi: string;
+  refEn: string;
+  textVi: string;
+  textEn: string;
+  noteVi: string;
+  noteEn: string;
+}
+
+export interface DevotionalTopic {
+  id: string;
+  titleVi: string;
+  titleEn: string;
+  subtitleVi: string;
+  subtitleEn: string;
+  iconEmoji: string;
+  accentColor: string;
+  descriptionVi: string;
+  descriptionEn: string;
+}
+
+export interface DevotionalLesson {
+  id: string;
+  topicId: string;
+  topicTitleVi: string;
+  topicTitleEn: string;
+  dayNumber: number;
+  titleVi: string;
+  titleEn: string;
+  subtitleVi: string;
+  subtitleEn: string;
+  innerMeaningVi: string;
+  innerMeaningEn: string;
+  selfReflectionVi: string;
+  selfReflectionEn: string;
+  dailyPracticeVi: string;
+  dailyPracticeEn: string;
+  prayerVi: string;
+  prayerEn: string;
+  scriptures: ScriptureItem[];
+}
+
+export const devotionalTopics: DevotionalTopic[] = [
+  {
+    id: 'self_love',
+    titleVi: 'Yêu Thương Bản Thân & Đền Thờ Nội Tại',
+    titleEn: 'Self-Love & The Inner Temple',
+    subtitleVi: 'Nhận diện giá trị thần khiết & chữa lành tâm hồn',
+    subtitleEn: 'Recognizing divine worth & inner soul healing',
+    iconEmoji: '✨',
+    accentColor: '#E65100',
+    descriptionVi: 'Khám phá bí mật thân thể là đền thờ của Thiên Chúa, tháo gỡ cảm giác tội lỗi, tự ti để yêu thương chính mình bằng tình yêu nguyên bản.',
+    descriptionEn: 'Discover the mystery that your body is God’s temple, releasing guilt and unworthiness to love yourself with pure divine love.',
+  },
+  {
+    id: 'agape',
+    titleVi: 'Tình Yêu Agape & Tha Thứ Vô Ngã',
+    titleEn: 'Agape Love & Selfless Forgiveness',
+    subtitleVi: 'Trái tim bao dung 70 lần 7 & vượt trên phán xét',
+    subtitleEn: 'A forgiving heart 70 times 7 & rising above judgment',
+    iconEmoji: '🕊️',
+    accentColor: '#AD1457',
+    descriptionVi: 'Giải mã dụ ngôn Người Sa-ma-ri nhân lành và lời dạy tha thứ 70 lần 7 để giải phóng tâm trí khỏi ngục tù của sự oán hờn.',
+    descriptionEn: 'Decoding the parable of the Good Samaritan and forgiving 70 times 7 to liberate the mind from the prison of resentment.',
+  },
+  {
+    id: 'service',
+    titleVi: 'Phụng Sự Vô Ngã & Tinh Thần Đầy Tớ',
+    titleEn: 'Selfless Service & Servant Spirit',
+    subtitleVi: 'Hạt lúa mì chết đi để sinh hoa trái dồi dào',
+    subtitleEn: 'The grain of wheat that dies to bear abundant fruit',
+    iconEmoji: '🌾',
+    accentColor: '#2E7D32',
+    descriptionVi: 'Bài học từ sự mục nát của hạt giống, cử chỉ rửa chân khiêm cung và cách kết nối vào Gốc Nho để phụng sự đời sống mà không kiệt sức.',
+    descriptionEn: 'Lessons from the seed that dies, humble foot-washing, and abiding in the True Vine to serve life without burnout.',
+  },
+  {
+    id: 'inner_peace',
+    titleVi: 'Bình An Nội Tại & Tháo Gỡ Nỗi Sợ',
+    titleEn: 'Inner Peace & Conquering Fear',
+    subtitleVi: 'Bài học từ hoa huệ đồng nội & tiếng thì thầm êm dịu',
+    subtitleEn: 'Lessons from lilies of the field & the still small voice',
+    iconEmoji: '🌊',
+    accentColor: '#0277BD',
+    descriptionVi: 'Lấy lại sự an tịnh giữa tâm bão, buông bỏ lo lắng tương lai, neo tâm vào giây phút hiện tại và đức tin trọn lành.',
+    descriptionEn: 'Reclaiming serenity in the storm, letting go of future anxiety, anchoring in the present moment through steadfast faith.',
+  },
+  {
+    id: 'parables',
+    titleVi: 'Giải Mã Các Ẩn Dụ Về Nước Trời',
+    titleEn: 'Decoding Kingdom Parables',
+    subtitleVi: 'Kho báu giấu trong ruộng & men làm dậy khối bột',
+    subtitleEn: 'Treasure hidden in a field & yeast in the dough',
+    iconEmoji: '💎',
+    accentColor: '#6A1B9A',
+    descriptionVi: 'Hiểu đúng về Nước Trời ở ngay trong lòng bạn, viên ngọc quý giá trị vĩnh cửu và tiềm năng chuyển hóa từ những hạt mầm tử tế nhỏ bé.',
+    descriptionEn: 'Understanding the Kingdom within you, the pearl of great price, and transformative power in tiny seeds of kindness.',
+  },
+];
+
+export const devotionalLessons: DevotionalLesson[] = [
+  // --- TOPIC 1 ---
+  {
+    id: 'self_love_1',
+    topicId: 'self_love',
+    topicTitleVi: 'Yêu Thương Bản Thân & Đền Thờ Nội Tại',
+    topicTitleEn: 'Self-Love & The Inner Temple',
+    dayNumber: 1,
+    titleVi: 'Ngôi Đền Thần Khiết Bên Trong Bạn',
+    titleEn: 'The Holy Temple Within You',
+    subtitleVi: 'Thân thể bạn là nơi ngự trị của Thánh Linh, không phải nơi chứa chấp tự ti hay tội lỗi',
+    subtitleEn: 'Your body is the dwelling place of the Holy Spirit, not a vessel for self-doubt or guilt',
+    innerMeaningVi: `Kinh Thánh trong Cựu Ước mô tả đền thờ Giê-ru-sa-lem uy nghiêm nơi Thượng Đế ngự trị sau các bức màn dầy đặc. Người bình thường sợ hãi không dám bước vào. Nhưng đến Tân Ước, Chúa Giê-su và Sứ đồ Phao-lô đã vén mở một sự thật tâm linh vĩ đại: Đền thờ chân thật nhất của Thượng Đế không được xây bằng đá gạch của con người, mà chính là Thân thể và Tâm thức của bạn!\n\nNước Trời không nằm ở một tọa độ địa lý xa xôi bên ngoài, mà đang hiện diện sống động bên trong bạn. Khi bạn căm ghét, tự ti, dằn vặt hay hành hạ bản thân bằng những suy nghĩ tiêu cực, bạn đang vô tình làm vấy bẩn ngôi đền thiêng liêng ấy. Yêu thương chính mình không phải là vị kỷ, mà là hành động tôn kính đầu tiên bạn dành cho Đấng Tạo Hóa đang ngự trị trong bạn.`,
+    innerMeaningEn: `The Old Testament describes the Jerusalem temple where God dwelt behind thick veils, feared by ordinary people. But in the New Testament, Jesus and Apostle Paul unveiled a profound spiritual truth: The true temple of God is not built of stones, but is your very body and consciousness!\n\nThe Kingdom of Heaven is not at a distant geographical coordinate; it is living within you. When you despise, judge, or abuse yourself with toxic thoughts, you unconsciously defile this holy temple. Loving yourself is not selfishness; it is your first act of reverence to the Creator living within you.`,
+    selfReflectionVi: 'Tôi đã từng khắt khe, tự trách móc và làm tổn thương thân thể hay tâm trí mình như thế nào? Hôm nay tôi có thể đối xử với bản thân bằng sự trân trọng xứng đáng với một ngôi đền thiêng liêng hay không?',
+    selfReflectionEn: 'How have I judged or wounded my own body and mind? Can I treat myself today with the reverence fitting a living sanctuary?',
+    dailyPracticeVi: 'Dành 3 phút tĩnh lặng, đặt tay lên ngực trái, cảm nhận nhịp thở và nhịp tim đập. Thầm cảm ơn từng tế bào trong cơ thể bạn vì đã luôn trung thành phụng sự sự sống của bạn.',
+    dailyPracticeEn: 'Spend 3 quiet minutes with your hand over your heart, feeling your breath and pulse. Silently thank every cell in your body for faithfully serving your life.',
+    prayerVi: 'Lạy Chúa, con tạ ơn Ngài đã chọn tâm hồn và thân thể con làm nơi Ngài ngự trị. Xin giải phóng con khỏi mọi mặc cảm tự ti, phán xét và tội lỗi. Từ hôm nay, con học cách nâng niu, tôn trọng và yêu thương chính mình như tạo vật quý giá trong mắt Ngài. Amen.',
+    prayerEn: 'Lord, thank You for choosing my heart and body as Your dwelling place. Free me from unworthiness and guilt. From today, I honor and love myself as a precious creation in Your sight. Amen.',
+    scriptures: [
+      {
+        bookId: 46,
+        slugVi: '1-co-rinh-to',
+        slugEn: '1-corinthians',
+        chapter: 3,
+        verse: 16,
+        refVi: 'I Cô-rinh-tô 3:16',
+        refEn: '1 Corinthians 3:16',
+        textVi: 'Anh em há chẳng biết mình là đền thờ của Ðức Chúa Trời, và Thánh Linh Ðức Chúa Trời ở trong anh em sao?',
+        textEn: 'Do you not know that you are God’s temple and that God’s Spirit dwells in you?',
+        noteVi: 'Sứ đồ Phao-lô khẳng định đền thờ của Chúa không phải là công trình đá gạch bên ngoài, mà chính là con người bạn.',
+        noteEn: 'Paul affirms God’s temple is your living being.',
+      },
+      {
+        bookId: 42,
+        slugVi: 'lu-ca',
+        slugEn: 'luke',
+        chapter: 17,
+        verse: 21,
+        refVi: 'Lu-ca 17:21',
+        refEn: 'Luke 17:21',
+        textVi: 'và người ta sẽ không nói: Ở đây, hay là: Ở đó; vì nầy, nước Ðức Chúa Trời ở trong các ngươi.',
+        textEn: 'For behold, the kingdom of God is in the midst of you.',
+        noteVi: 'Chúa Giê-su vén mở: Vương quốc thiêng liêng đang hiện diện sống động ngay trong tâm thức mỗi người.',
+        noteEn: 'Jesus reveals the Divine Kingdom is within your consciousness.',
+      },
+    ],
+  },
+  {
+    id: 'self_love_2',
+    topicId: 'self_love',
+    topicTitleVi: 'Yêu Thương Bản Thân & Đền Thờ Nội Tại',
+    topicTitleEn: 'Self-Love & The Inner Temple',
+    dayNumber: 2,
+    titleVi: 'Sự Sáng Của Thế Gian & Giữ Gìn Tấm Lòng',
+    titleEn: 'Light of the World & Guarding Your Heart',
+    subtitleVi: 'Bạn vốn là ánh sáng; hãy bảo vệ suối nguồn tâm thức khỏi những phán xét độc hại',
+    subtitleEn: 'You are naturally light; guard your inner wellspring from toxic judgments',
+    innerMeaningVi: `Chúa Giê-su tuyên bố: "Các ngươi là sự sáng của thế gian." Hãy chú ý: Ngài không nói "sau này khi các ngươi hoàn hảo thì mới trở thành sự sáng". Bản tính thần thánh nguyên thủy của bạn vốn dĩ đã là ánh sáng. Nhưng khi bạn cho phép những lời đàm tiếu bên ngoài, những mặc cảm tội lỗi do xã hội áp đặt che phủ, ngọn đèn bên trong bạn bị giấu dưới cái thùng.\n\nGiữ gìn tấm lòng chính là thiết lập ranh giới tâm linh lành mạnh. Đừng biến tâm trí bạn thành bãi rác cho sự cay đắng hay ganh tị của thế gian.`,
+    innerMeaningEn: `Jesus declared: "You are the light of the world." Notice He did not say: "You might become light if you are perfect." Light is your inherent nature. But when you allow public gossip and self-judgment to crowd your heart, the lamp is hidden under a basket.\n\nGuarding your heart means setting healthy spiritual boundaries. Refuse to let bitterness, jealousy, and guilt poison your inner spring of life.`,
+    selfReflectionVi: 'Tôi có đang để những lời chê bai, phán xét của người khác dập tắt ánh sáng tự tin và bình an bên trong mình không?',
+    selfReflectionEn: 'What toxic narratives from outside am I still allowing to dim my inner light?',
+    dailyPracticeVi: 'Hôm nay, mỗi khi một suy nghĩ tự ti hoặc đố kỵ xuất hiện, hãy mỉm cười nhẹ nhàng và thầm nhủ: "Tôi chọn bảo vệ sự thanh tịnh trong đền thờ tâm hồn tôi."',
+    dailyPracticeEn: 'Whenever an envious or self-critical thought arises today, smile gently and whisper: "I choose to let my inner light shine in peace."',
+    prayerVi: 'Lạy Cha, xin dạy con biết cẩn thận giữ gìn tấm lòng mình hơn hết, vì các nguồn sự sống do nơi đó mà ra. Xin ánh sáng Chân Lý xua tan mọi bóng tối tự ti trong con. Amen.',
+    prayerEn: 'Father, help me guard my heart above all else, for it is the wellspring of life. May Your light dispel all shadows in me. Amen.',
+    scriptures: [
+      {
+        bookId: 40,
+        slugVi: 'ma-thi-o',
+        slugEn: 'matthew',
+        chapter: 5,
+        verse: 14,
+        refVi: 'Ma-thi-ơ 5:14',
+        refEn: 'Matthew 5:14',
+        textVi: 'Các ngươi là sự sáng của thế gian. Một cái thành ở trên núi thì không khi nào bị khuất được.',
+        textEn: 'You are the light of the world. A city set on a hill cannot be hidden.',
+        noteVi: 'Định danh tâm linh tối cao: Bản tính thật của bạn là ánh sáng, không phải bóng tối.',
+        noteEn: 'Your divine identity is light, not darkness.',
+      },
+      {
+        bookId: 20,
+        slugVi: 'cham-ngon',
+        slugEn: 'proverbs',
+        chapter: 4,
+        verse: 23,
+        refVi: 'Châm ngôn 4:23',
+        refEn: 'Proverbs 4:23',
+        textVi: 'Duyên cớ ấy, khá cẩn thận giữ tấm lòng của con hơn hết, Vì các nguồn sự sống do nơi đó mà ra.',
+        textEn: 'Keep your heart with all vigilance, for from it flow the springs of life.',
+        noteVi: 'Bảo vệ năng lượng nội tâm là chìa khóa duy trì sinh lực và bình an.',
+        noteEn: 'Guarding your inner sanctuary is essential.',
+      },
+    ],
+  },
+  {
+    id: 'self_love_3',
+    topicId: 'self_love',
+    topicTitleVi: 'Yêu Thương Bản Thân & Đền Thờ Nội Tại',
+    topicTitleEn: 'Self-Love & The Inner Temple',
+    dayNumber: 3,
+    titleVi: 'Quý Giá Hơn Muôn Vàn Chim Sẻ',
+    titleEn: 'More Precious Than Many Sparrows',
+    subtitleVi: 'Giá trị nội tại tối thượng của bạn không phụ thuộc vào tiền tài hay địa vị xã hội',
+    subtitleEn: 'Unconditional divine worth independent of social status or wealth',
+    innerMeaningVi: `Tâm thức nhị nguyên của xã hội luôn lập trình con người tin rằng: "Tôi chỉ có giá trị khi tôi giàu có, thành công, xinh đẹp hoặc được người khác ngưỡng mộ." Nhưng Chúa Giê-su đã dùng hình ảnh chim sẻ để đập tan ảo tưởng ấy: Một con chim sẻ nhỏ bé không tự nuôi mình được mà Thượng Đế còn chăm bẵm từng li từng tí, huống chi là bạn!\n\nNgay cả tóc trên đầu bạn cũng đã được đếm hết rồi. Bạn quý giá đơn giản vì bạn là tạo tác thiêng liêng duy nhất của Đấng Tối Cao.`,
+    innerMeaningEn: `The worldly mindset conditions us to believe that our worth equals our bank account, job title, or physical appearance. Jesus shattered this lie with the sparrow metaphor: Even a tiny bird is deeply cared for by God. How much more precious are you!\n\nTrue self-love begins when you detach your self-worth from external achievements and anchor it in God’s unconditional love.`,
+    selfReflectionVi: 'Tôi có hay so sánh bản thân với sự thành công của người khác để rồi tự dằn vặt không? Đâu mới là thước đo giá trị thật sự của linh hồn tôi?',
+    selfReflectionEn: 'Do I often feel unworthy when I compare myself to others? Where does my real identity lie?',
+    dailyPracticeVi: 'Đứng trước gương sáng nay, nhìn thẳng vào mắt mình và mỉm cười nói: "Bạn rất đáng yêu, quý giá và được Thiên Chúa trân trọng vô điều kiện."',
+    dailyPracticeEn: 'Look into the mirror this morning, look into your own eyes, and say: "I am loved and deeply cherished by God exactly as I am."',
+    prayerVi: 'Tạ ơn Cha vì tình yêu vô điều kiện Ngài dành cho con. Xin chữa lành đứa trẻ bên trong con vốn luôn thèm khát sự công nhận của người đời, giúp con an trú trong giá trị vĩnh cửu của Ngài. Amen.',
+    prayerEn: 'Loving Father, thank You for numbering every hair on my head. Grant me the grace to see my worth through Your loving eyes. Amen.',
+    scriptures: [
+      {
+        bookId: 42,
+        slugVi: 'lu-ca',
+        slugEn: 'luke',
+        chapter: 12,
+        verse: 7,
+        refVi: 'Lu-ca 12:7',
+        refEn: 'Luke 12:7',
+        textVi: 'Đến như tóc trên đầu các ngươi cũng đã đếm hết rồi. Đừng sợ chi, các ngươi quý trọng hơn nhiều chim sẻ.',
+        textEn: 'Why, even the hairs of your head are all numbered. Fear not; you are of more value than many sparrows.',
+        noteVi: 'Sự quan phòng tuyệt đối của Thượng Đế đối với từng chi tiết nhỏ nhất trong cuộc đời bạn.',
+        noteEn: 'God cares for every detail of your being.',
+      },
+    ],
+  },
+
+  // --- TOPIC 2: AGAPE ---
+  {
+    id: 'agape_1',
+    topicId: 'agape',
+    topicTitleVi: 'Tình Yêu Agape & Tha Thứ Vô Ngã',
+    topicTitleEn: 'Agape Love & Selfless Forgiveness',
+    dayNumber: 1,
+    titleVi: 'Người Sa-ma-ri Nhân Lành: Tình Thương Vượt Lên Giáo Điều',
+    titleEn: 'The Good Samaritan: Love Beyond Dogma',
+    subtitleVi: 'Tình yêu thật sự phá vỡ mọi biên giới tôn giáo, sắc tộc và định kiến xã hội',
+    subtitleEn: 'Compassion transcends religious labels and social boundaries',
+    innerMeaningVi: `Thời Chúa Giê-su, người Sa-ma-ri bị người Do Thái coi là phường dị giáo đáng khinh bỉ. Thế nhưng, khi một người bị đánh cướp nằm bên đường, vị thầy tế lễ và người Lê-vi (những biểu tượng đạo đức tôn giáo thời bấy giờ) đều né tránh đi qua. Chỉ có người Sa-ma-ri dừng lại, băng bó vết thương và chi trả mọi viện phí cho người xa lạ.\n\nĐạo thật không nằm ở danh xưng, nghi thức bên ngoài hay kiến thức giáo lý uyên bác. Đạo thật tỏa rạng khi lòng trắc ẩn thúc đẩy bạn dang tay cứu giúp tha nhân vô điều kiện.`,
+    innerMeaningEn: `In Jesus’s time, Samaritans were despised as religious heretics. Yet, in the parable, while the priest and Levite walked past the wounded man, it was the Samaritan who stopped, bandaged his wounds, and paid for his recovery.\n\nTrue spirituality is not proven by religious titles or ritual piety, but by genuine compassion in action. Love knows no tribalism or doctrinal walls.`,
+    selfReflectionVi: 'Tôi có đang vô thức phân biệt đối xử hoặc giữ khoảng cách với những người khác biệt quan điểm, niềm tin hay tầng lớp với mình không?',
+    selfReflectionEn: 'Do I judge others based on their religion, social background, or political views? Who is my neighbor today?',
+    dailyPracticeVi: 'Hãy làm một việc tử tế cho một người mà bạn vốn không mấy có cảm tình hoặc một người xa lạ không quen biết hôm nay.',
+    dailyPracticeEn: 'Show a sincere gesture of kindness to someone outside your usual comfort zone or social circle.',
+    prayerVi: 'Lạy Chúa, xin cất khỏi lòng con những hàng rào định kiến hẹp hòi. Xin ban cho con trái tim của Người Sa-ma-ri nhân lành, biết rung động trước nỗi đau của tha nhân. Amen.',
+    prayerEn: 'Lord, melt away my prejudices. Give me the compassionate heart of the Samaritan to bind the wounds of anyone in need. Amen.',
+    scriptures: [
+      {
+        bookId: 42,
+        slugVi: 'lu-ca',
+        slugEn: 'luke',
+        chapter: 10,
+        verse: 33,
+        refVi: 'Lu-ca 10:33-34',
+        refEn: 'Luke 10:33-34',
+        textVi: 'Song một người Sa-ma-ri đi đường, đến gần người đó, ngó thấy thì động lòng thương; áp lại, lấy dầu và rượu xức chỗ bị thương, rồi rịt lại...',
+        textEn: 'But a Samaritan, as he journeyed, came to where he was, and when he saw him, he had compassion.',
+        noteVi: 'Tình yêu thương vượt lên mọi ranh giới tôn giáo, chủng tộc và giai cấp.',
+        noteEn: 'Love transcends religious and social barriers.',
+      },
+    ],
+  },
+  {
+    id: 'agape_2',
+    topicId: 'agape',
+    topicTitleVi: 'Tình Yêu Agape & Tha Thứ Vô Ngã',
+    topicTitleEn: 'Agape Love & Selfless Forgiveness',
+    dayNumber: 2,
+    titleVi: 'Tha Thứ Bảy Mươi Lần Bảy: Chìa Khóa Tự Do',
+    titleEn: 'Forgiving 70 Times 7: Key to Freedom',
+    subtitleVi: 'Tha thứ không phải để dung túng cái ác, mà là để giải phóng chính bạn khỏi ngục tù oán hận',
+    subtitleEn: 'Forgiveness is releasing a prisoner, only to discover the prisoner was you',
+    innerMeaningVi: `Khi Phi-e-rơ hỏi có phải tha thứ đến 7 lần là đủ, Chúa Giê-su đáp: "Không phải bảy lần, mà là bảy mươi lần bảy" — con số tượng trưng cho sự vô hạn và vô điều kiện.\n\nÔm giữ sự oán hờn cũng giống như việc bạn tự uống thuốc độc rồi mong cho kẻ khác chết. Sự tha thứ không có nghĩa là bạn đồng tình với hành động sai trái của họ, mà là bạn cắt đứt sợi dây năng lượng tiêu cực đang trói buộc tâm thức bạn vào quá khứ.`,
+    innerMeaningEn: `When Peter asked whether forgiving seven times was enough, Jesus answered: "Seventy times seven" — meaning infinitely and unconditionally.\n\nHolding onto resentment is like drinking poison and expecting the other person to die. Forgiveness does not mean approving of wrongdoing; it means severing the emotional chains of bitterness so your soul can be free.`,
+    selfReflectionVi: 'Ai là người tôi vẫn đang ngấm ngầm oán hận trong lòng? Cơn giận ấy đang làm tổn hại sức khỏe và bình an của chính tôi như thế nào?',
+    selfReflectionEn: 'Who is still held in the prison of my resentment? Am I ready to set myself free by forgiving them today?',
+    dailyPracticeVi: 'Nhắm mắt lại, hình dung khuôn mặt người từng làm tổn thương bạn. Hãy thở ra một hơi dài và thầm nói: "Tôi tha thứ cho bạn, tôi trả lại tự do cho bạn và trả lại bình an cho chính tôi."',
+    dailyPracticeEn: 'Silently send thoughts of peace and release to someone who hurt you in the past: "I release you, and I set myself free in God’s peace."',
+    prayerVi: 'Lạy Chúa Cứu Thế, Đấng đã xin tha cho những kẻ đóng đinh Ngài trên thập tự giá. Xin ban thêm sức mạnh để con biết buông bỏ mọi cay đắng, sống trong sự tự do thánh khiết của tha thứ. Amen.',
+    prayerEn: 'Lord Jesus, as You forgave from the cross, grant me the courage to forgive freely. Cleanse my heart from all bitterness. Amen.',
+    scriptures: [
+      {
+        bookId: 40,
+        slugVi: 'ma-thi-o',
+        slugEn: 'matthew',
+        chapter: 18,
+        verse: 22,
+        refVi: 'Ma-thi-ơ 18:21-22',
+        refEn: 'Matthew 18:21-22',
+        textVi: 'Ðức Chúa Giê-su đáp rằng: Ta không nói cùng ngươi rằng đến bảy lần đâu, nhưng đến bảy mươi lần bảy.',
+        textEn: 'Jesus said to him, "I do not say to you seven times, but seventy-seven times."',
+        noteVi: 'Sự tha thứ vô hạn: Tha thứ là trạng thái thường trực của tâm thức tỉnh thức.',
+        noteEn: 'Infinite forgiveness without conditions.',
+      },
+    ],
+  },
+  {
+    id: 'agape_3',
+    topicId: 'agape',
+    topicTitleVi: 'Tình Yêu Agape & Tha Thứ Vô Ngã',
+    topicTitleEn: 'Agape Love & Selfless Forgiveness',
+    dayNumber: 3,
+    titleVi: 'Cái Rác Trong Mắt Anh Em & Cây Đà Trong Mắt Mình',
+    titleEn: 'Removing the Speck and the Log',
+    subtitleVi: 'Vượt qua thói quen phóng chiếu phán xét của bản ngã để nhìn đời bằng mắt thương',
+    subtitleEn: 'Transcending the ego’s habit of judging others',
+    innerMeaningVi: `Bản ngã con người rất thích đóng vai quan tòa: Nó thích soi mói từng lỗi lầm nhỏ của người khác để cảm thấy mình "đạo đức" và "thượng đẳng" hơn. Chúa Giê-su dùng hình ảnh hài hước sâu sắc: Tại sao ngươi chăm chú nhìn cái rác trong mắt anh em, mà lại chẳng thấy cây đà gỗ to tướng trong chính mắt mình?\n\nMọi phán xét gay gắt ta dành cho người khác thực chất là sự phóng chiếu những bóng tối và bất an chưa được chữa lành trong nội tâm của chính ta.`,
+    innerMeaningEn: `Jesus used humorous imagery: Why stare at the speck of dust in your brother’s eye while ignoring the wooden plank in your own?\n\nWhenever we judge someone harshly, we are usually projecting our own unhealed wounds and shadow aspects onto them. Ceasing judgment restores clarity and opens the door to genuine empathy.`,
+    selfReflectionVi: 'Mỗi khi tôi bức xúc chỉ trích một ai đó, phần nào bên trong tôi đang cảm thấy bị đe dọa hoặc thầm ghen tị với họ?',
+    selfReflectionEn: 'What flaw in others irritates me the most? Could it be a reflection of something unhealed in myself?',
+    dailyPracticeVi: 'Một ngày "nhịn phán xét": Hôm nay, tuyệt đối không chê bai, bình phẩm hay chỉ trích bất kỳ ai, cả trong lời nói lẫn suy nghĩ thầm kín.',
+    dailyPracticeEn: 'Whenever you catch yourself mentally judging someone today, immediately pause and pray a silent blessing over them.',
+    prayerVi: 'Lạy Chúa, xin lấy đi cây đà định kiến khỏi đôi mắt tâm hồn con, để con nhìn mọi người bằng ánh mắt nhân từ bao dung như Ngài nhìn con. Amen.',
+    prayerEn: 'Heavenly Father, heal my spiritual vision. Keep my tongue from condemning and my heart from self-righteous pride. Amen.',
+    scriptures: [
+      {
+        bookId: 40,
+        slugVi: 'ma-thi-o',
+        slugEn: 'matthew',
+        chapter: 7,
+        verse: 3,
+        refVi: 'Ma-thi-ơ 7:1-3',
+        refEn: 'Matthew 7:1-3',
+        textVi: 'Sao ngươi dòm thấy cái rác trong mắt anh em ngươi, mà chẳng thấy cây đà trong mắt mình?',
+        textEn: 'Judge not, that you be not judged... Why do you see the speck that is in your brother’s eye, but do not notice the log that is in your own eye?',
+        noteVi: 'Quy luật phóng chiếu tâm lý: Tự biết mình trước khi sửa người.',
+        noteEn: 'Self-awareness must precede any correction of others.',
+      },
+    ],
+  },
+
+  // --- TOPIC 3: SERVICE ---
+  {
+    id: 'service_1',
+    topicId: 'service',
+    topicTitleVi: 'Phụng Sự Vô Ngã & Tinh Thần Đầy Tớ',
+    topicTitleEn: 'Selfless Service & Servant Spirit',
+    dayNumber: 1,
+    titleVi: 'Hạ Mình Rửa Chân: Đỉnh Cao Của Lãnh Đạo Khiêm Cung',
+    titleEn: 'Washing Feet: The Pinnacle of Servant Leadership',
+    subtitleVi: 'Người vĩ đại nhất trong Nước Trời là người biết cúi mình phụng sự mọi người bằng lòng thanh sạch',
+    subtitleEn: 'The greatest in the Kingdom is the one who serves with a clean heart',
+    innerMeaningVi: `Ở xứ Pha-lê-tin thời xưa, rửa chân cho khách đi đường bụi bặm là phận sự của người nô lệ thấp kém nhất trong nhà. Vậy mà trong bữa tiệc ly, Chúa Giê-su — Đấng là Thầy và là Chúa — đã đứng dậy, thắt lưng bằng khăn và cúi xuống rửa chân cho từng môn đệ.\n\nĐó là một cú sốc đảo lộn mọi trật tự quyền lực thế gian: Trong Nước Trời, quyền lực không dùng để thống trị, mà dùng để nâng đỡ; sự vĩ đại không đo bằng số kẻ hầu hạ mình, mà đo bằng mức độ phụng sự vô ngã của bạn.`,
+    innerMeaningEn: `In ancient Palestine, foot washing was the lowest duty relegated to servants. Yet Jesus, the Teacher and Lord, tied a towel around His waist and washed the dusty feet of His disciples.\n\nTrue greatness in God’s eyes is measured not by how many serve you, but by how humbly and selflessly you serve others. Humility is divine power in disguise.`,
+    selfReflectionVi: 'Tôi có xu hướng muốn người khác phải phục tùng, cung phụng và kính nể mình không? Tôi có sẵn sàng làm những việc nhỏ bé, thầm lặng không ai thấy để giúp đỡ người khác?',
+    selfReflectionEn: 'Do I crave recognition and praise when I do good deeds? How can I serve quietly without seeking status?',
+    dailyPracticeVi: 'Hôm nay, hãy âm thầm làm một công việc phục vụ trong gia đình hoặc cơ quan (rửa bát, dọn dẹp, hỗ trợ đồng nghiệp) với tâm thế hoan hỷ mà không cần ai khen thưởng.',
+    dailyPracticeEn: 'Perform a humble household chore or quiet act of service today without drawing anyone’s attention.',
+    prayerVi: 'Lạy Chúa Giê-su, xin ban cho con tấm lòng khiêm nhu như Ngài, để con không sống tìm kiếm danh vọng hão huyền, mà biết tìm thấy niềm vui đích thực trong sự phụng sự tha nhân. Amen.',
+    prayerEn: 'Lord Jesus, You knelt to wash the feet of Your followers. Instill in me a servant’s heart to bless others in humility and joy. Amen.',
+    scriptures: [
+      {
+        bookId: 43,
+        slugVi: 'giang',
+        slugEn: 'john',
+        chapter: 13,
+        verse: 14,
+        refVi: 'Giăng 13:14',
+        refEn: 'John 13:14',
+        textVi: 'Vậy, nếu ta là Chúa và là Thầy, mà đã rửa chân cho các ngươi, thì các ngươi cũng phải rửa chân lẫn nhau.',
+        textEn: 'If I then, your Lord and Teacher, have washed your feet, you also ought to wash one another’s feet.',
+        noteVi: 'Hành động biểu tượng cho lãnh đạo phục vụ và đức khiêm nhường tột bậc.',
+        noteEn: 'Leadership demonstrated through humble service.',
+      },
+    ],
+  },
+  {
+    id: 'service_2',
+    topicId: 'service',
+    topicTitleVi: 'Phụng Sự Vô Ngã & Tinh Thần Đầy Tớ',
+    topicTitleEn: 'Selfless Service & Servant Spirit',
+    dayNumber: 2,
+    titleVi: 'Hạt Lúa Mì Chết Đi Để Sinh Nhiều Hoa Trái',
+    titleEn: 'The Grain of Wheat That Dies',
+    subtitleVi: 'Buông bỏ sự bám chấp bản ngã chật hẹp để khơi nguồn sức sống tâm linh bất tận',
+    subtitleEn: 'Releasing ego attachment to birth abundant spiritual fruit',
+    innerMeaningVi: `Hạt lúa mì nếu cứ giữ khư khư hình hài nguyên vẹn của nó thì sẽ mãi mãi cô đơn một mình. Chỉ khi nó chấp nhận chôn vùi trong lòng đất, vỏ bọc cứng nhắc của nó vỡ ra và mục nát, mầm sống thiêng liêng bên trong mới trỗi dậy thành cây lúa trĩu hạt.\n\n"Chết cho bản ngã" không phải là hủy hoại bản thân, mà là buông bỏ sự ích kỷ, tham lam và những toan tính nhỏ nhen để tình yêu và sự sống vô hạn của Thiên Chúa tuôn chảy qua bạn.`,
+    innerMeaningEn: `A grain of wheat preserved in a dry jar remains alone. Only when buried in the earth and broken open does it unleash the miraculous harvest within.\n\n"Dying to self" does not mean self-hatred; it means releasing rigid ego-attachments, selfishness, and pride so that divine love can flourish through you.`,
+    selfReflectionVi: 'Tôi đang bám víu vào điều gì (sự kiểm soát, cái tôi cá nhân, sự an toàn giả tạo) mà không dám mở lòng cho sự chuyển hóa tâm linh lớn lao hơn?',
+    selfReflectionEn: 'What selfish attachment or stubborn desire is ready to be released into God’s soil today?',
+    dailyPracticeVi: 'Từ bỏ một thói quen cố chấp: Lắng nghe ý kiến của người khác trong một cuộc họp hay trò chuyện gia đình mà không tranh cãi để giành phần thắng.',
+    dailyPracticeEn: 'Consciously yield your personal agenda in one small conflict today to foster peace and harmony.',
+    prayerVi: 'Lạy Cha, xin dạy con can đảm chết đi cho những thói ích kỷ và kiêu hãnh của bản ngã, để sự sống phục sinh đầy hoa trái của Ngài nở rộ trong đời sống con. Amen.',
+    prayerEn: 'Father, help me surrender my ego so Your abundant life and grace may sprout and blossom through my words and actions. Amen.',
+    scriptures: [
+      {
+        bookId: 43,
+        slugVi: 'giang',
+        slugEn: 'john',
+        chapter: 12,
+        verse: 24,
+        refVi: 'Giăng 12:24',
+        refEn: 'John 12:24',
+        textVi: 'Quả thật, quả thật, ta nói cùng các ngươi, nếu hột giống lúa mì chẳng chết sau khi gieo xuống đất, thì vẫn ở một mình; nhưng nếu chết đi, thì kết quả được nhiều.',
+        textEn: 'Truly, truly, I say to you, unless a grain of wheat falls into the earth and dies, it remains alone; but if it dies, it bears much fruit.',
+        noteVi: 'Quy luật bất biến của sự biến đổi tâm thức: Vượt qua cái tôi giới hạn để đến với cái toàn thể.',
+        noteEn: 'Transformation through spiritual surrender.',
+      },
+    ],
+  },
+  {
+    id: 'service_3',
+    topicId: 'service',
+    topicTitleVi: 'Phụng Sự Vô Ngã & Tinh Thần Đầy Tớ',
+    topicTitleEn: 'Selfless Service & Servant Spirit',
+    dayNumber: 3,
+    titleVi: 'Gốc Nho Và Nhánh Nho: Bí Quyết Phụng Sự Không Kiệt Sức',
+    titleEn: 'The Vine and the Branches: Serving Without Burnout',
+    subtitleVi: 'Nối kết trực tiếp vào Nguồn Sống thiêng liêng — Dòng chảy tình yêu tự nhiên không cần gồng gánh',
+    subtitleEn: 'Abiding in the Source — Effortless flow of divine love',
+    innerMeaningVi: `Một nhánh nho không cần phải gồng mình, căng thẳng hay nghiến răng để ép ra trái nho. Nó chỉ cần làm đúng một việc duy nhất: Gắn liền với Thân Nho, để nhựa sống từ gốc tự nhiên lưu chuyển nuôi dưỡng nó đơm hoa kết trái.\n\nNhiều người phụng sự xã hội hay gia đình bị rơi vào trạng thái "kiệt sức tâm linh" (burnout) vì họ đang cố dùng sức riêng, ý chí hữu hạn của bản ngã để gánh vác. Khi bạn biết tĩnh tâm mỗi ngày, kết nối với Nguồn Tình Yêu Vô Hạn, việc phụng sự sẽ trở nên nhẹ nhàng, tự nhiên như hơi thở.`,
+    innerMeaningEn: `A branch does not struggle or sweat to produce grapes; it simply remains connected to the Vine, allowing the sap of life to flow naturally through it.\n\nMany people experience spiritual burnout because they try to serve out of their limited human willpower. When you abide in daily communion with God, service becomes a joyful, effortless overflow.`,
+    selfReflectionVi: 'Tôi có đang cảm thấy quá tải, mệt mỏi và cạn kiệt năng lượng vì đang ôm đồm mọi việc bằng sức người có hạn không?',
+    selfReflectionEn: 'Am I running on spiritual empty? Have I disconnected from quiet time with God while trying to do everything myself?',
+    dailyPracticeVi: 'Mỗi khi bắt đầu làm một công việc gì hôm nay, hãy dừng lại 30 giây, thở sâu và thầm cầu nguyện: "Xin Nguồn Sống của Chúa tuôn chảy qua con."',
+    dailyPracticeEn: 'Take three 60-second breathing breaks throughout the day to consciously reconnect with Christ the True Vine.',
+    prayerVi: 'Lạy Chúa Cứu Thế, Ngài là Gốc Nho, con chỉ là nhánh nhỏ. Xin giữ con luôn gắn chặt vào Ngài, để mọi việc con làm đều là hoa trái tự nhiên của tình yêu Ngài. Amen.',
+    prayerEn: 'Lord Jesus, You are the Vine; I am the branch. Apart from You I can do nothing. Keep me rooted in Your love always. Amen.',
+    scriptures: [
+      {
+        bookId: 43,
+        slugVi: 'giang',
+        slugEn: 'john',
+        chapter: 15,
+        verse: 5,
+        refVi: 'Giăng 15:5',
+        refEn: 'John 15:5',
+        textVi: 'Ta là gốc nho, các ngươi là nhánh. Ai cứ ở trong ta và ta trong họ thì sinh ra lắm trái; vì ngoài ta, các ngươi chẳng làm chi được.',
+        textEn: 'I am the vine; you are the branches. Whoever abides in me and I in him, he it is that bears much fruit, for apart from me you can do nothing.',
+        noteVi: 'Sự phụ thuộc lành mạnh vào Nguồn Năng Lượng Thiêng Liêng để sinh hoa trái bền vững.',
+        noteEn: 'Abiding in the Source guarantees fruitful living.',
+      },
+    ],
+  },
+
+  // --- TOPIC 4: INNER PEACE ---
+  {
+    id: 'inner_peace_1',
+    topicId: 'inner_peace',
+    topicTitleVi: 'Bình An Nội Tại & Tháo Gỡ Nỗi Sợ',
+    topicTitleEn: 'Inner Peace & Conquering Fear',
+    dayNumber: 1,
+    titleVi: 'Bình An Giữa Tâm Bão',
+    titleEn: 'Peace Amidst the Storm',
+    subtitleVi: 'Đánh thức Đấng Bình An trong con thuyền tâm hồn bạn',
+    subtitleEn: 'Awakening the Christ consciousness in the boat of your soul',
+    innerMeaningVi: `Khi cơn bão lớn ập đến, sóng biển tràn ngập thuyền, các môn đệ hoảng loạn la hét vì sợ chết đuối. Nhưng Chúa Giê-su vẫn an nhiên nằm ngủ ở đằng sau lái. Khi được đánh thức, Ngài phán một lời: "Hãy êm đi, lặng đi!" thì gió liền tắt và biển lặng như tờ.\n\nSóng gió bên ngoài (kinh tế, sức khỏe, thị phi) sẽ luôn xảy ra trong cõi đời này. Nhưng nếu bạn có Chúa ngự trong tâm thức, cơn bão bên ngoài không thể nào nhấn chìm bạn. Sự hoảng loạn không giải quyết được vấn đề; sự an tịnh nội tại mới là sức mạnh tối thượng.`,
+    innerMeaningEn: `When waves crashed over the boat, the disciples panicked while Jesus slept peacefully. Awoken, He rebuked the storm: "Peace! Be still!" and calm returned.\n\nThe outer world will always have storms of economic, relational, or health challenges. But inside your soul, the Prince of Peace is present. When you connect with His peace, outer waves lose their power to shake you.`,
+    selfReflectionVi: 'Cơn bão nào đang khiến tôi lo lắng, bất an nhất hiện nay? Tôi có đang quên mất rằng Đấng Bình An vẫn đang hiện diện cùng tôi trên con thuyền cuộc đời?',
+    selfReflectionEn: 'What outer circumstance is currently triggering panic or worry in me? Can I rest in Christ’s calm today?',
+    dailyPracticeVi: 'Khi cảm thấy căng thẳng hay âu lo trỗi dậy, hãy nhắm mắt lại, hít một hơi thật sâu và thầm nói: "Hãy êm đi, lặng đi! Bình an của Chúa đang ở đây."',
+    dailyPracticeEn: 'When facing stress today, close your eyes, take a deep breath, and mentally declare: "Peace, be still!"',
+    prayerVi: 'Lạy Chúa, xin ngự trị và làm chủ mọi cơn giông bão của tâm trí con. Xin ban cho con sự bình an sâu thẳm vượt trên mọi sự hiểu biết của trần gian. Amen.',
+    prayerEn: 'Lord Jesus, speak peace into my racing mind. Be the anchor of my soul through every storm of life. Amen.',
+    scriptures: [
+      {
+        bookId: 41,
+        slugVi: 'mac',
+        slugEn: 'mark',
+        chapter: 4,
+        verse: 39,
+        refVi: 'Mác 4:39',
+        refEn: 'Mark 4:39',
+        textVi: 'Ngài bèn thức dậy, quở gió và phán cùng biển rằng: Hãy êm đi, lặng đi! Gió liền dứt và đều yên lặng như tờ.',
+        textEn: 'And he awoke and rebuked the wind and said to the sea, "Peace! Be still!" And the wind ceased, and there was a great calm.',
+        noteVi: 'Quyền năng tâm linh điều phục sự hỗn loạn bên ngoài bắt đầu từ sự an tịnh bên trong.',
+        noteEn: 'Spiritual authority over chaos.',
+      },
+    ],
+  },
+  {
+    id: 'inner_peace_2',
+    topicId: 'inner_peace',
+    topicTitleVi: 'Bình An Nội Tại & Tháo Gỡ Nỗi Sợ',
+    topicTitleEn: 'Inner Peace & Conquering Fear',
+    dayNumber: 2,
+    titleVi: 'Hoa Huệ Đồng Nội: Bài Học Buông Bỏ Lo Lắng Tương Lai',
+    titleEn: 'Lilies of the Field: Freedom from Anxiety',
+    subtitleVi: 'Sống trọn vẹn trong giây phút hiện tại và tin cậy sự quan phòng của Cha',
+    subtitleEn: 'Releasing control and trusting divine Providence',
+    innerMeaningVi: `Chúa Giê-su dạy ta bài học từ loài hoa huệ: Chúng chẳng làm lụng khó nhọc, cũng chẳng kéo chỉ, thế mà dẫu vua Sa-lô-môn sang trọng tột bậc cũng không mặc đẹp bằng một hoa nào trong số ấy!\n\nNỗi lo lắng về ngày mai không thể kéo dài đời bạn thêm một gang tấc nào, nó chỉ rút cạn sinh lực của bạn trong ngày hôm nay. Hãy học cách tin cậy: Vũ trụ này không vận hành một cách ngẫu nhiên vô tâm; Cha Trên Trời biết rõ điều bạn cần trước cả khi bạn cầu xin.`,
+    innerMeaningEn: `Jesus pointed to the wildflowers: They neither labor nor spin, yet Solomon in all his splendor was not dressed like one of them.\n\nWorry cannot add a single cubit to your life. Anxiety is the illusion that you alone are responsible for holding the universe together. Letting go into God’s care brings deep, abiding serenity.`,
+    selfReflectionVi: 'Tôi có thói quen tưởng tượng ra những kịch bản tồi tệ trong tương lai để rồi tự làm mình sợ hãi không? Hôm nay tôi có thể buông bỏ gánh nặng ấy cho Cha?',
+    selfReflectionEn: 'What future outcome am I anxiously trying to micromanage right now? Can I surrender it to God?',
+    dailyPracticeVi: 'Dành 1 phút quan sát một nhành cây, bông hoa hay bầu trời xanh. Cảm nhận sự nuôi dưỡng tự nhiên của Tạo Hóa dành cho muôn loài.',
+    dailyPracticeEn: 'Look outside at a tree or flower today. Reflect on how effortlessly nature is sustained by the Creator.',
+    prayerVi: 'Lạy Cha, con xin trao phó mọi nỗi lo cơm áo gạo tiền và tương lai vào bàn tay yêu thương của Ngài. Xin dạy con biết an hưởng vẻ đẹp của từng giây phút hiện tại. Amen.',
+    prayerEn: 'Heavenly Father, You clothe the flowers and feed the birds. I surrender my worries into Your loving hands. Amen.',
+    scriptures: [
+      {
+        bookId: 40,
+        slugVi: 'ma-thi-o',
+        slugEn: 'matthew',
+        chapter: 6,
+        verse: 28,
+        refVi: 'Ma-thi-ơ 6:28-29',
+        refEn: 'Matthew 6:28-29',
+        textVi: 'Hãy ngắm xem hoa huệ ngoài đồng mọc lên thể nào: chẳng làm khó nhọc, cũng không kéo chỉ; song ta nói cùng các ngươi, dẫu vua Sa-lô-môn sang trọng đến đâu, cũng không được mặc áo tốt như một hoa nào trong giống đó.',
+        textEn: 'Consider the lilies of the field, how they grow: they neither toil nor spin, yet I tell you, even Solomon in all his glory was not arrayed like one of these.',
+        noteVi: 'Vẻ đẹp của sự thả lỏng và tin cậy tuyệt đối vào quy luật sinh dưỡng của vũ trụ.',
+        noteEn: 'Divine beauty without anxious striving.',
+      },
+    ],
+  },
+  {
+    id: 'inner_peace_3',
+    topicId: 'inner_peace',
+    topicTitleVi: 'Bình An Nội Tại & Tháo Gỡ Nỗi Sợ',
+    topicTitleEn: 'Inner Peace & Conquering Fear',
+    dayNumber: 3,
+    titleVi: 'Tiếng Thì Thầm Êm Dịu Trong Hang Đá',
+    titleEn: 'The Still Small Voice in the Cave',
+    subtitleVi: 'Gặp gỡ Thiên Chúa trong sự tĩnh lặng sâu lắng, không phải nơi ồn ào náo động',
+    subtitleEn: 'Encountering God in quietness rather than dramatic noise',
+    innerMeaningVi: `Khi tiên tri Ê-li kiệt sức và trầm cảm chạy trốn vào hang đá, Chúa đã cho các hiện tượng hùng vĩ đi qua: Gió bão xé núi, động đất dữ dội, lửa bốc ngút trời. Nhưng Thượng Đế không ở trong gió, không ở trong động đất, cũng không ở trong lửa. Ngài chỉ xuất hiện sau đó, trong một "tiếng thì thầm êm dịu" (still small voice).\n\nThế giới ngày nay ngập tràn tiếng còi xe, thông báo điện thoại và những tranh luận ầm ĩ. Bạn không thể nghe thấy tiếng Chúa nếu tâm trí bạn lúc nào cũng náo loạn. Sức mạnh và sự thông sáng thật sự chỉ đến khi bạn biết tĩnh lặng.`,
+    innerMeaningEn: `Prophet Elijah fled into the desert, exhausted and depressed. God did not appear in the roaring wind, the earthquake, or the blazing fire, but in a gentle, still whisper.\n\nOur modern world is flooded with notifications, noise, and hurry. God waits for us in holy silence. In quietness and trust is your strength.`,
+    selfReflectionVi: 'Mỗi ngày tôi dành bao nhiêu thời gian cho sự tĩnh lặng hoàn toàn mà không có màn hình điện thoại hay âm thanh giải trí?',
+    selfReflectionEn: 'How much time do I spend in total silence each day without screens or background audio?',
+    dailyPracticeVi: 'Thực hành "5 phút cai nghiện âm thanh": Tắt hết thiết bị, ngồi yên lặng, không nói lời nào, chỉ lắng nghe tiếng thở của chính mình và cảm nhận sự hiện diện của Thượng Đế.',
+    dailyPracticeEn: 'Schedule 5 minutes of unplugged silence today. Simply sit in God’s presence without speaking words.',
+    prayerVi: 'Lạy Chúa, xin lắng dịu những tiếng ồn ào xao động trong đầu con. Xin dạy con biết yêu sự thinh lặng thánh thiện để con có thể lắng nghe tiếng Ngài dẫn dắt. Amen.',
+    prayerEn: 'Lord, quiet the chatter of my mind. Teach me to listen for Your still, small voice in the sanctuary of my soul. Amen.',
+    scriptures: [
+      {
+        bookId: 11,
+        slugVi: '1-vua',
+        slugEn: '1-kings',
+        chapter: 19,
+        verse: 12,
+        refVi: 'I Các Vua 19:12',
+        refEn: '1 Kings 19:12',
+        textVi: 'Sau cơn động đất có lửa; song không có Ðức Giê-hô-va trong lửa. Sau lửa, có một tiếng êm dịu nhỏ nhẹ.',
+        textEn: 'And after the earthquake a fire, but the Lord was not in the fire. And after the fire the sound of a low whisper.',
+        noteVi: 'Thiên Chúa phán dạy trong sự thinh lặng sâu kín của tâm hồn.',
+        noteEn: 'God speaks in gentle stillness.',
+      },
+    ],
+  },
+
+  // --- TOPIC 5: PARABLES ---
+  {
+    id: 'parables_1',
+    topicId: 'parables',
+    topicTitleVi: 'Giải Mã Các Ẩn Dụ Về Nước Trời',
+    topicTitleEn: 'Decoding Kingdom Parables',
+    dayNumber: 1,
+    titleVi: 'Kho Báu Giấu Trong Ruộng & Viên Ngọc Quý',
+    titleEn: 'Treasure in the Field & Pearl of Great Price',
+    subtitleVi: 'Nhận diện giá trị vô song của sự thức tỉnh tâm linh vượt trên mọi của cải trần gian',
+    subtitleEn: 'Discovering the supreme value of spiritual awakening',
+    innerMeaningVi: `Người tìm được kho báu trong ruộng liền vui mừng về bán hết mọi gia tài mình có để mua đám ruộng đó. Người lái buôn tìm được viên ngọc quý giá liền bán hết châu báu khác để sở hữu viên ngọc duy nhất ấy.\n\nKho báu và Viên ngọc chính là sự thức tỉnh về Nước Trời — trạng thái tâm thức hòa nhập trong tình yêu và ánh sáng của Thượng Đế. Khi bạn đã nếm trải sự bình an bất diệt này, những danh lợi, tiền tài phù hoa của trần gian tự khắc không còn sức trói buộc bạn nữa.`,
+    innerMeaningEn: `A man found treasure hidden in a field and in his joy sold everything he had to buy that field. A merchant found a pearl of supreme value and gladly parted with all other jewels.\n\nOnce you taste the living reality of God’s presence, worldly attachments lose their hypnotic grip. Sacrificing lesser things for the Ultimate Good is not loss; it is pure joy.`,
+    selfReflectionVi: 'Tôi có đang mải mê gom góp những viên sỏi vô giá trị của trần gian mà bỏ quên viên ngọc quý vĩnh hằng trong tâm hồn mình không?',
+    selfReflectionEn: 'What worldly treasures am I clinging to that prevent me from fully claiming the Kingdom within?',
+    dailyPracticeVi: 'Tự vấn lại những mục tiêu cuộc đời: Hãy chọn ra một điều có giá trị vĩnh cửu đối với linh hồn bạn để đầu tư thời gian vào hôm nay.',
+    dailyPracticeEn: 'Identify one material craving today and consciously decide to invest that time or resource in spiritual growth instead.',
+    prayerVi: 'Lạy Cha, Ngài chính là kho báu và gia nghiệp lớn nhất của đời con. Xin cho lòng con luôn hướng về Ngài, vượt lên trên mọi cám dỗ hư vinh của đời tạm này. Amen.',
+    prayerEn: 'Father, You are my greatest treasure. May my heart always value Your presence above all fleeting worldly wealth. Amen.',
+    scriptures: [
+      {
+        bookId: 40,
+        slugVi: 'ma-thi-o',
+        slugEn: 'matthew',
+        chapter: 13,
+        verse: 44,
+        refVi: 'Ma-thi-ơ 13:44-46',
+        refEn: 'Matthew 13:44-46',
+        textVi: 'Nước thiên đàng giống như của báu chôn trong một đám ruộng... lại giống như một người lái buôn kiếm ngọc tốt. Khi đã tìm được một hòn ngọc quý giá, thì đi bán hết gia tài mình mà mua hòn ngọc đó.',
+        textEn: 'The kingdom of heaven is like treasure hidden in a field... Again, the kingdom of heaven is like a merchant in search of fine pearls...',
+        noteVi: 'Giá trị tuyệt đối của giác ngộ tâm linh: Sẵn sàng buông bỏ cái hữu hạn vì cái vô hạn.',
+        noteEn: 'The peerless worth of divine reality.',
+      },
+    ],
+  },
+  {
+    id: 'parables_2',
+    topicId: 'parables',
+    topicTitleVi: 'Giải Mã Các Ẩn Dụ Về Nước Trời',
+    topicTitleEn: 'Decoding Kingdom Parables',
+    dayNumber: 2,
+    titleVi: 'Hạt Cải Nhỏ Bé: Sức Mạnh Chuyển Hóa Của Những Việc Thiện Nhỏ',
+    titleEn: 'The Mustard Seed: The Power of Tiny Beginnings',
+    subtitleVi: 'Đừng coi thường những hành động tử tế vi mô; trong hạt mầm nhỏ có cả một rừng cây',
+    subtitleEn: 'How microscopic acts of faith transform lives and communities',
+    innerMeaningVi: `Hạt cải là một trong những hạt giống bé nhỏ nhất, nhưng tiềm năng ẩn sâu bên trong nó là một thân cây lớn che mát cho muông chim trú ngụ.\n\nQuy luật tâm linh của Nước Trời luôn vận hành theo cách thầm lặng: Bạn không cần phải làm những điều long trời lở đất mới có ý nghĩa. Một suy nghĩ thiện lành, một lời an ủi chân thành, một nụ cười ấm áp trao đi trong vô ngã chính là một hạt cải sống. Nó sẽ âm thầm lan tỏa và chuyển hóa môi trường xung quanh bạn.`,
+    innerMeaningEn: `The mustard seed is the smallest of garden seeds, yet it grows into a tree large enough for birds to nest in its branches.\n\nNever underestimate small, faithful acts: a kind word, a quiet prayer, a moment of patience. In God’s spiritual physics, tiny seeds planted with love yield cosmic harvests.`,
+    selfReflectionVi: 'Tôi có hay nghĩ rằng sự đóng góp của mình quá nhỏ bé nên không tạo ra sự khác biệt không? Hôm nay tôi có thể gieo một "hạt cải tử tế" nào?',
+    selfReflectionEn: 'Do I discount my ability to make a difference because I feel small or insignificant?',
+    dailyPracticeVi: 'Hãy gieo một "hạt mầm tử tế" thầm lặng hôm nay: Nhắn tin cảm ơn một ai đó, mỉm cười với người phục vụ, hoặc cầu nguyện chúc phước cho người bạn gặp trên đường.',
+    dailyPracticeEn: 'Plant one "mustard seed" of kindness today: send an encouraging note, smile at a stranger, or pray for someone unnoticed.',
+    prayerVi: 'Lạy Chúa, xin dùng con như một chút hạt cải yêu thương nhỏ bé giữa đời. Xin giúp con không bao giờ nản lòng trước những điều nhỏ nhặt, mà luôn kiên trì gieo rắc sự ấm áp và hy vọng vào lòng người. Amen.',
+    prayerEn: 'Lord, take my small offerings of love and multiply them according to Your sovereign grace to bless the world. Amen.',
+    scriptures: [
+      {
+        bookId: 40,
+        slugVi: 'ma-thi-o',
+        slugEn: 'matthew',
+        chapter: 13,
+        verse: 31,
+        refVi: 'Ma-thi-ơ 13:31-32',
+        refEn: 'Matthew 13:31-32',
+        textVi: 'Nước thiên đàng giống như một hột cải mà người kia lấy gieo trong ruộng mình; hột ấy thật nhỏ hơn các giống khác, song khi đã mọc lên, thì lớn hơn các giống rau, và trở nên cây...',
+        textEn: 'The kingdom of heaven is like a grain of mustard seed... though it is the smallest of all seeds, yet when it has grown it is larger than all the garden plants...',
+        noteVi: 'Quy luật tăng trưởng kỳ diệu từ những hạt mầm tâm linh nhỏ bé nhất.',
+        noteEn: 'Microscopic faith yielding massive impact.',
+      },
+    ],
+  },
+  {
+    id: 'parables_3',
+    topicId: 'parables',
+    topicTitleVi: 'Giải Mã Các Ẩn Dụ Về Nước Trời',
+    topicTitleEn: 'Decoding Kingdom Parables',
+    dayNumber: 3,
+    titleVi: 'Men Làm Dậy Bột: Sự Lan Tỏa Âm Thầm Của Ân Điển',
+    titleEn: 'Yeast in the Flour: Silent Inner Transformation',
+    subtitleVi: 'Năng lượng ân sủng thẩm thấu và biến đổi toàn diện đời sống từ bên trong',
+    subtitleEn: 'The pervasive, quiet alchemy of grace permeating all of life',
+    innerMeaningVi: `Một nhúm men tuy mắt thường không nhận biết được sau khi trộn vào bột, nhưng sức sống của nó sẽ làm dậy men toàn bộ ba đấu bột lớn!\n\nÂn sủng của Thiên Chúa hoạt động trong tâm thức bạn cũng giống như men trong bột: Nó không gây ồn ào khoa trương, nhưng dần dần thẩm thấu vào từng nếp nghĩ, thói quen, cách bạn phản ứng với cuộc đời, cho đến khi toàn bộ con người cũ của bạn được tái sinh trong ánh sáng mới.`,
+    innerMeaningEn: `A woman took yeast and mixed it into three measures of flour until all of it was leavened. Yeast works silently from the inside out; you cannot see it work, but the bread expands and nourishes.\n\nSpiritual growth is not always dramatic or loud. Divine grace silently permeates your thoughts, habits, and relationships until your entire being is transformed.`,
+    selfReflectionVi: 'Tôi có đang kiên nhẫn với hành trình biến đổi tâm linh của chính mình và những người xung quanh không?',
+    selfReflectionEn: 'Can I trust God’s unseen work in my soul even when I don’t feel sudden, dramatic changes?',
+    dailyPracticeVi: 'Ghi nhận một sự tiến bộ nhỏ trong tính cách của bạn so với năm ngoái (ví dụ: bớt nóng giận hơn, biết lắng nghe hơn) và cảm tạ ơn Chúa.',
+    dailyPracticeEn: 'Praise God for the subtle, quiet changes He has already brought into your character over the past year.',
+    prayerVi: 'Lạy Chúa, xin men yêu thương và bình an của Thánh Linh thấm nhuần vào mọi ngóc ngách trong tâm tư con, biến đổi đời sống con thành nguồn phước cho mọi người. Amen.',
+    prayerEn: 'Lord, let Your Holy Spirit permeate every corner of my heart like holy leaven, transforming my whole life for Your glory. Amen.',
+    scriptures: [
+      {
+        bookId: 40,
+        slugVi: 'ma-thi-o',
+        slugEn: 'matthew',
+        chapter: 13,
+        verse: 33,
+        refVi: 'Ma-thi-ơ 13:33',
+        refEn: 'Matthew 13:33',
+        textVi: 'Nước thiên đàng giống như men mà một người đàn bà kia lấy trộn vào trong ba đấu bột, cho đến chừng nào cả đống đều dậy hết.',
+        textEn: 'The kingdom of heaven is like leaven that a woman took and hid in three measures of flour, till it was all leavened.',
+        noteVi: 'Sức mạnh thẩm thấu toàn diện và chuyển hóa sâu sắc từ bên trong của Ân Điển.',
+        noteEn: 'Grace transforming human nature from within.',
+      },
+    ],
+  },
+];
+
+export function getAllDevotionalTopics(): DevotionalTopic[] {
+  return devotionalTopics;
+}
+
+export function getDevotionalTopicById(id: string): DevotionalTopic | undefined {
+  return devotionalTopics.find(t => t.id === id);
+}
+
+export function getAllDevotionalLessons(): DevotionalLesson[] {
+  return devotionalLessons;
+}
+
+export function getDevotionalLessonsByTopic(topicId: string): DevotionalLesson[] {
+  return devotionalLessons.filter(l => l.topicId === topicId);
+}
+
+export function getDevotionalLessonById(id: string): DevotionalLesson | undefined {
+  return devotionalLessons.find(l => l.id === id);
+}

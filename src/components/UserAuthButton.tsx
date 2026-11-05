@@ -17,6 +17,7 @@ export default function UserAuthButton({ currentLang = 'vi' }: UserAuthButtonPro
     lastSyncFormatted,
     setAuthModalOpen,
     setUserDataModalOpen,
+    setAccountInfoModalOpen,
     logout,
     manualSync,
   } = useAuth();
@@ -112,8 +113,22 @@ export default function UserAuthButton({ currentLang = 'vi' }: UserAuthButtonPro
             </div>
           </div>
 
-          {/* Quick Nav to Cloud Data */}
+          {/* Quick Nav to Account Info & Cloud Data */}
           <div className="py-1">
+            <button
+              onClick={() => {
+                setIsDropdownOpen(false);
+                setAccountInfoModalOpen(true);
+              }}
+              className="w-full text-left px-4 py-2 text-xs font-semibold hover:bg-stone-50 flex items-center justify-between cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <span>👤</span>
+                <span>{isVi ? 'Thông tin tài khoản' : 'Account Information'}</span>
+              </span>
+              <span className="text-[10px] text-stone-400">⚙️</span>
+            </button>
+
             <button
               onClick={() => {
                 setIsDropdownOpen(false);

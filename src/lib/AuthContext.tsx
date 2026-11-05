@@ -7,9 +7,16 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  linkWithCredential,
+  EmailAuthProvider,
+  sendPasswordResetEmail,
   signOut,
 } from 'firebase/auth';
-import { auth, googleProvider } from './firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, googleProvider, db } from './firebase';
 import {
   UserCloudData,
   getLocalCloudData,
@@ -37,9 +44,15 @@ interface AuthContextType {
   setAuthModalOpen: (open: boolean) => void;
   isUserDataModalOpen: boolean;
   setUserDataModalOpen: (open: boolean) => void;
+  isAccountInfoModalOpen: boolean;
+  setAccountInfoModalOpen: (open: boolean) => void;
+  hasPasswordProvider: boolean;
   signInWithGoogle: () => Promise<void>;
   signInWithEmail: (email: string, pass: string) => Promise<void>;
-  registerWithEmail: (email: string, pass: string) => Promise<void>;
+  registerWithEmail: (email: string, pass: string, fullName: string) => Promise<void>;
+  resetPasswordWithEmail: (email: string) => Promise<void>;
+  updateUserDisplayName: (newName: string) => Promise<void>;
+  updateUserPassword: (currentPassword: string | null, newPassword: string) => Promise<void>;
   logout: () => Promise<void>;
   manualSync: () => Promise<void>;
   addHighlight: (record: HighlightRecord) => void;
@@ -54,12 +67,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userVersion, setUserVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [cloudData, setCloudData] = useState<UserCloudData>(getLocalCloudData());
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncStr, setLastSyncStr] = useState<string | null>(getLastSyncTime());
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   const [isUserDataModalOpen, setUserDataModalOpen] = useState(false);
+  const [isAccountInfoModalOpen, setAccountInfoModalOpen] = useState(false);
 
   // Subscribe to local/cloud data changes
   useEffect(() => {
@@ -119,10 +134,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [triggerSync]);
 
-  const registerWithEmail = useCallback(async (email: string, pass: string) => {
+  const registerWithEmail = useCallback(async (email: string, pass: string, fullName: string) => {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, pass);
       if (res.user) {
+        if (fullName.trim()) {
+          await updateProfile(res.user, { displayName: fullName.trim() });
+        }
+        setUserVersion((v) => v + 1);
         await triggerSync(res.user);
       }
     } catch (err: unknown) {
@@ -130,6 +149,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw err;
     }
   }, [triggerSync]);
+
+  const resetPasswordWithEmail = useCallback(async (email: string) => {
+    auth.languageCode = 'en'; // Ensure reset email is sent in English
+    await sendPasswordResetEmail(auth, email.trim());
+  }, []);
+
+  const updateUserDisplayName = useCallback(async (newName: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error('Chưa đăng nhập');
+    const trimmed = newName.trim();
+    if (!trimmed) throw new Error('Tên hiển thị không được để trống');
+
+    await updateProfile(currentUser, { displayName: trimmed });
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await setDoc(userDocRef, { displayName: trimmed }, { merge: true });
+    } catch (e) {
+      console.warn('Firestore displayName sync warning:', e);
+    }
+    setUser(auth.currentUser);
+    setUserVersion((v) => v + 1);
+  }, []);
+
+  const hasPasswordProvider = useMemo(() => {
+    void userVersion;
+    if (!user) return false;
+    return user.providerData?.some((p) => p.providerId === 'password') ?? false;
+  }, [user, userVersion]);
+
+  const updateUserPassword = useCallback(async (currentPassword: string | null, newPassword: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || !currentUser.email) throw new Error('Chưa đăng nhập');
+
+    const hasPass = currentUser.providerData?.some((p) => p.providerId === 'password') ?? false;
+    if (hasPass) {
+      if (!currentPassword) {
+        throw new Error('Vui lòng nhập mật khẩu hiện tại.');
+      }
+      const cred = EmailAuthProvider.credential(currentUser.email, currentPassword);
+      await reauthenticateWithCredential(currentUser, cred);
+      await updatePassword(currentUser, newPassword);
+    } else {
+      // User currently has no password (e.g. signed in via Google only)
+      const cred = EmailAuthProvider.credential(currentUser.email, newPassword);
+      try {
+        await linkWithCredential(currentUser, cred);
+      } catch (err: unknown) {
+        const e = err as { code?: string };
+        if (e?.code === 'auth/provider-already-linked') {
+          await updatePassword(currentUser, newPassword);
+        } else {
+          throw err;
+        }
+      }
+    }
+    setUser(auth.currentUser);
+    setUserVersion((v) => v + 1);
+  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -192,9 +269,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setAuthModalOpen,
         isUserDataModalOpen,
         setUserDataModalOpen,
+        isAccountInfoModalOpen,
+        setAccountInfoModalOpen,
+        hasPasswordProvider,
         signInWithGoogle,
         signInWithEmail,
         registerWithEmail,
+        resetPasswordWithEmail,
+        updateUserDisplayName,
+        updateUserPassword,
         logout,
         manualSync,
         addHighlight,

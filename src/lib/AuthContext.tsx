@@ -372,29 +372,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     // Call our backend API to dispatch the 6-digit code email in English
-    let relaySent = false;
-    try {
-      const apiRes = await fetch('/api/auth/send-reset-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, code: otpCode }),
-      });
-      if (apiRes.ok) {
-        const json = await apiRes.json();
-        relaySent = Boolean(json.relaySent);
-      }
-    } catch {
-      // Ignore network error
-    }
-
-    // Only fall back to Firebase's default reset email if our custom 6-digit SMTP email didn't send
-    if (!relaySent) {
-      try {
-        auth.languageCode = 'en';
-        await sendPasswordResetEmail(auth, cleanEmail);
-      } catch {
-        // Ignore
-      }
+    const apiRes = await fetch('/api/auth/send-reset-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cleanEmail, code: otpCode }),
+    });
+    const json = await apiRes.json().catch(() => ({}));
+    if (!apiRes.ok || !json.relaySent) {
+      throw new Error(json.message || 'Không thể gửi email mã xác thực. Vui lòng thử lại.');
     }
 
     void snap;

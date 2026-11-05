@@ -152,15 +152,12 @@ export default function SearchModal({
             triggerClassName ||
             'inline-flex items-center gap-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-300/80 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-stone-700 transition-all shadow-2xs cursor-pointer'
           }
-          title={`${t.searchPlaceholder} (Ctrl+K)`}
+          title={t.searchPlaceholder || 'Tìm kiếm'}
         >
           <span>🔍</span>
           <span className="hidden sm:inline">
-            {currentLang === 'vi' ? 'Tìm câu gốc' : currentLang === 'es' ? 'Buscar' : 'Search'}
+            {currentLang === 'vi' ? 'Tìm kiếm' : currentLang === 'es' ? 'Buscar' : 'Search'}
           </span>
-          <kbd className="hidden lg:inline-block bg-white text-[10px] text-stone-500 font-mono px-1.5 py-0.5 rounded border border-stone-200">
-            Ctrl K
-          </kbd>
         </button>
       )}
 

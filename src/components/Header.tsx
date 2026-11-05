@@ -43,17 +43,17 @@ export default function Header({
         </Link>
 
         {/* Navigation Bar */}
-        <nav className="flex items-center gap-1.5 sm:gap-3 text-xs sm:text-sm font-medium">
+        <nav className="flex items-center gap-1 sm:gap-3 text-xs sm:text-sm font-medium">
           <Link
             href={lessonsLink}
-            className="text-stone-700 hover:text-amber-800 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-stone-100 whitespace-nowrap"
+            className="text-stone-700 hover:text-amber-800 transition-colors px-2 sm:px-2.5 py-1.5 rounded-lg hover:bg-stone-100 whitespace-nowrap"
           >
             {t.lessons}
           </Link>
 
           <Link
             href={bibleLink}
-            className="hidden sm:inline-flex text-stone-700 hover:text-amber-800 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-stone-100 whitespace-nowrap"
+            className="inline-flex text-stone-700 hover:text-amber-800 transition-colors px-2 sm:px-2.5 py-1.5 rounded-lg hover:bg-stone-100 whitespace-nowrap"
           >
             {t.readBible}
           </Link>

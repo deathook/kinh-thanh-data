@@ -9,13 +9,25 @@ interface WebTtsPlayerProps {
   lang: string;
 }
 
+const SPEED_OPTIONS = [
+  { value: 0.5, label: '0.5x' },
+  { value: 0.75, label: '0.75x' },
+  { value: 1, label: '1.0x' },
+  { value: 1.25, label: '1.25x' },
+  { value: 1.5, label: '1.5x' },
+  { value: 1.75, label: '1.75x' },
+  { value: 2, label: '2.0x' },
+];
+
 export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [currentVerseIndex, setCurrentVerseIndex] = useState<number | null>(null);
   const [speechRate, setSpeechRate] = useState<number>(1.0);
-  const [isSupported, setIsSupported] = useState(true);
+  const [isSupported] = useState(true);
+  const [showFloating, setShowFloating] = useState(false);
 
+  const inlineCardRef = useRef<HTMLDivElement | null>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeIndexRef = useRef<number>(0);
@@ -26,12 +38,23 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
   const langConfig = getLangConfig(lang);
   const t = getTranslation(lang);
 
+  // Detect when inline player card scrolls out of view to show floating bottom player
   useEffect(() => {
-    rateRef.current = speechRate;
-    if (audioRef.current) {
-      audioRef.current.playbackRate = speechRate;
-    }
-  }, [speechRate]);
+    const el = inlineCardRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Show floating player when inline card is scrolled above the viewport
+        const isAboveViewport = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+        setShowFloating(isAboveViewport);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Update voices from Web Speech API
   const updateVoices = useCallback(() => {
@@ -57,7 +80,6 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
         audioRef.current.pause();
         audioRef.current = null;
       }
-      // Clean up karaoke highlights
       if (typeof document !== 'undefined') {
         document.querySelectorAll('.active-karaoke-verse').forEach((el) => {
           el.classList.remove('active-karaoke-verse');
@@ -104,7 +126,6 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
     const cfg = getLangConfig(targetLang);
     const prefix = cfg.voiceLang.split('-')[0].toLowerCase();
 
-    // 1. Search for keyword matches (e.g. "Google tiếng Việt", "An", "HoaiMy")
     for (const kw of cfg.voiceKeywords) {
       const match = voices.find(
         (v) =>
@@ -114,13 +135,11 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
       if (match) return match;
     }
 
-    // 2. Exact match on language tag
     const exact = voices.find(
       (v) => v.lang.toLowerCase().replace('_', '-') === cfg.voiceLang.toLowerCase().replace('_', '-')
     );
     if (exact) return exact;
 
-    // 3. Prefix match
     const byPrefix = voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
     if (byPrefix) return byPrefix;
 
@@ -146,11 +165,9 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
       const prefix = lang === 'vi' ? `Câu ${v.verse}. ` : `${t.verse} ${v.verse}. `;
       const fullText = prefix + v.text;
 
-      // Check if browser has genuine native voice for this language
       const matchedVoice = findMatchingVoice(voicesRef.current, lang);
 
       if (matchedVoice && synthRef.current) {
-        // Option A: Use Web Speech API with verified native voice
         if (synthRef.current.paused) {
           synthRef.current.resume();
         }
@@ -185,7 +202,6 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
 
         synthRef.current.speak(utterance);
       } else {
-        // Option B: High-definition Google TTS Audio Stream via /api/tts
         if (audioRef.current) {
           audioRef.current.pause();
         }
@@ -226,6 +242,18 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
     },
     [lang, langConfig.voiceLang, stopAudio, t.verse, verses]
   );
+
+  const handleSpeedChange = (newRate: number) => {
+    setSpeechRate(newRate);
+    rateRef.current = newRate;
+    if (audioRef.current) {
+      audioRef.current.playbackRate = newRate;
+    } else if (isPlayingRef.current && synthRef.current) {
+      // Restart current verse immediately at the new speed for Web Speech API
+      synthRef.current.cancel();
+      speakVerseAtIndex(activeIndexRef.current);
+    }
+  };
 
   const startPlaying = () => {
     if (verses.length === 0) return;
@@ -268,83 +296,183 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
     return null;
   }
 
+  const progressPercent =
+    currentVerseIndex !== null && verses.length > 0
+      ? Math.round(((currentVerseIndex + 1) / verses.length) * 100)
+      : 0;
+
   return (
-    <div className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-4 my-6 shadow-xs">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        {/* Left: Speaker Icon & Title */}
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div
-            className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-2xs ${
-              isPlaying
-                ? 'bg-amber-700 text-white animate-pulse'
-                : 'bg-amber-800 text-white'
-            }`}
-          >
-            <span className="text-lg">🔊</span>
-          </div>
-          <div>
-            <div className="font-semibold text-stone-900 text-sm">
-              {t.ttsTitle}
+    <>
+      {/* 1. Top Inline Player Card */}
+      <div
+        ref={inlineCardRef}
+        className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-4 my-6 shadow-xs"
+      >
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Left: Speaker Icon & Title */}
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div
+              className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-2xs ${
+                isPlaying
+                  ? 'bg-amber-700 text-white animate-pulse'
+                  : 'bg-amber-800 text-white'
+              }`}
+            >
+              <span className="text-lg">🔊</span>
             </div>
-            <div className="text-xs text-stone-500">
-              {isPlaying && currentVerseIndex !== null
-                ? `${t.ttsPlaying} (${t.verse} ${verses[currentVerseIndex]?.verse}/${verses.length})`
-                : isPaused
-                ? t.ttsPaused
-                : `${langConfig.flag} ${langConfig.localName} • ${langConfig.bibleName}`}
+            <div>
+              <div className="font-semibold text-stone-900 text-sm">
+                {t.ttsTitle}
+              </div>
+              <div className="text-xs text-stone-500">
+                {isPlaying && currentVerseIndex !== null
+                  ? `${t.ttsPlaying} (${t.verse} ${verses[currentVerseIndex]?.verse}/${verses.length})`
+                  : isPaused
+                  ? t.ttsPaused
+                  : `${langConfig.flag} ${langConfig.localName} • ${langConfig.bibleName}`}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right: Controls */}
-        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
-          {/* Speed Selector: 0.5x, 0.75x, 1x (default), 1.5x, 2.0x */}
-          <select
-            value={speechRate.toString()}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              setSpeechRate(val);
-            }}
-            className="bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-3 py-2 outline-none focus:border-amber-700 transition cursor-pointer font-medium shadow-2xs"
-            title="Speed"
-          >
-            <option value="0.5">0.5x</option>
-            <option value="0.75">0.75x</option>
-            <option value="1">1.0x</option>
-            <option value="1.5">1.5x</option>
-            <option value="2">2.0x</option>
-          </select>
+          {/* Right: Controls */}
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
+            {/* Speed Selector: 0.5x, 0.75x, 1.0x, 1.25x, 1.5x, 1.75x, 2.0x */}
+            <select
+              value={speechRate.toString()}
+              onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
+              className="bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-3 py-2 outline-none focus:border-amber-700 transition cursor-pointer font-medium shadow-2xs"
+              title="Tốc độ đọc / Speed"
+            >
+              {SPEED_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value.toString()}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
 
-          {/* Play / Pause / Resume */}
-          {!isPlaying ? (
-            <button
-              onClick={startPlaying}
-              className="bg-amber-800 hover:bg-amber-900 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>{isPaused ? '▶' : '🎧'}</span>
-              <span>{isPaused ? t.ttsResume : t.ttsPlay}</span>
-            </button>
-          ) : (
-            <button
-              onClick={pauseAudio}
-              className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>⏸</span>
-              <span>{t.ttsPaused}</span>
-            </button>
-          )}
+            {/* Play / Pause / Resume */}
+            {!isPlaying ? (
+              <button
+                onClick={startPlaying}
+                className="bg-amber-800 hover:bg-amber-900 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>{isPaused ? '▶' : '🎧'}</span>
+                <span>{isPaused ? t.ttsResume : t.ttsPlay}</span>
+              </button>
+            ) : (
+              <button
+                onClick={pauseAudio}
+                className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>⏸</span>
+                <span>{t.ttsPaused}</span>
+              </button>
+            )}
 
-          {/* Stop Button */}
-          {(isPlaying || isPaused) && (
-            <button
-              onClick={stopAudio}
-              className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer"
-            >
-              ⏹ {t.ttsStop}
-            </button>
-          )}
+            {/* Stop Button */}
+            {(isPlaying || isPaused) && (
+              <button
+                onClick={stopAudio}
+                className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer"
+              >
+                ⏹ {t.ttsStop}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* 2. Floating Bottom Player Bar (shown when user scrolls down past inline card) */}
+      <div
+        className={`fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-2xl transition-all duration-300 ${
+          showFloating
+            ? 'translate-y-0 opacity-100 pointer-events-auto'
+            : 'translate-y-12 opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="bg-white/95 backdrop-blur-md border border-amber-300/90 rounded-2xl shadow-xl overflow-hidden">
+          {/* Progress Bar on top edge when playing/paused */}
+          {(isPlaying || isPaused) && (
+            <div className="w-full h-1 bg-amber-100">
+              <div
+                className="h-full bg-amber-700 transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          )}
+
+          <div className="px-3.5 py-2.5 flex items-center justify-between gap-2.5">
+            {/* Left: Compact Info */}
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div
+                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-2xs ${
+                  isPlaying
+                    ? 'bg-amber-700 text-white animate-pulse'
+                    : 'bg-amber-800 text-white'
+                }`}
+              >
+                <span className="text-sm">🔊</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-stone-900 text-xs sm:text-sm truncate">
+                  {title}
+                </div>
+                <div className="text-[11px] text-stone-500 truncate">
+                  {isPlaying && currentVerseIndex !== null
+                    ? `${t.ttsPlaying} (${t.verse} ${verses[currentVerseIndex]?.verse}/${verses.length})`
+                    : isPaused
+                    ? `${t.ttsPaused} (${t.verse} ${verses[currentVerseIndex ?? 0]?.verse}/${verses.length})`
+                    : `${langConfig.flag} ${langConfig.bibleName}`}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Compact Controls */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <select
+                value={speechRate.toString()}
+                onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
+                className="bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-xs rounded-xl px-2 sm:px-2.5 py-1.5 outline-none focus:border-amber-700 transition cursor-pointer font-semibold"
+                title="Tốc độ đọc / Speed"
+              >
+                {SPEED_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value.toString()}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+
+              {!isPlaying ? (
+                <button
+                  onClick={startPlaying}
+                  className="bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold px-3 sm:px-3.5 py-1.5 rounded-xl transition shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                >
+                  <span>{isPaused ? '▶' : '🎧'}</span>
+                  <span className="hidden xs:inline">{isPaused ? t.ttsResume : t.ttsPlay}</span>
+                </button>
+              ) : (
+                <button
+                  onClick={pauseAudio}
+                  className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-3 sm:px-3.5 py-1.5 rounded-xl transition shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                >
+                  <span>⏸</span>
+                  <span className="hidden xs:inline">{t.ttsPaused}</span>
+                </button>
+              )}
+
+              {(isPlaying || isPaused) && (
+                <button
+                  onClick={stopAudio}
+                  className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold px-2.5 py-1.5 rounded-xl transition cursor-pointer"
+                  title={t.ttsStop}
+                >
+                  ⏹
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

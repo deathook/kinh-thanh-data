@@ -333,19 +333,26 @@ export default function LessonReaderView({ lesson }: LessonReaderViewProps) {
               </button>
             )}
 
-            {/* Speed toggle */}
-            {isPlayingRef.current && (
-              <button
-                onClick={() => {
-                  const rates = [0.8, 1.0, 1.25];
-                  const nextIndex = (rates.indexOf(speechRate) + 1) % rates.length;
-                  setSpeechRate(rates[nextIndex]);
+            {/* Speed selector */}
+            {isSupported && (
+              <select
+                value={speechRate.toString()}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  setSpeechRate(val);
+                  rateRef.current = val;
                 }}
-                className="text-[11px] font-mono px-2 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-md border border-stone-200"
-                title="Thay đổi tốc độ đọc"
+                className="text-xs font-medium px-2 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-full border border-stone-200 outline-none cursor-pointer"
+                title="Tốc độ nghe / đọc"
               >
-                {speechRate}x
-              </button>
+                <option value="0.5">0.5x</option>
+                <option value="0.75">0.75x</option>
+                <option value="1">1.0x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+                <option value="1.75">1.75x</option>
+                <option value="2">2.0x</option>
+              </select>
             )}
           </div>
 

@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { getLangConfig, getTranslation } from '@/lib/i18n';
 
 interface WebTtsPlayerProps {
   verses: Array<{ verse: number; text: string }>;
   title: string;
   lang: string;
+  nextChapterUrl?: string;
 }
 
 const SPEED_OPTIONS = [
@@ -19,7 +21,13 @@ const SPEED_OPTIONS = [
   { value: 2, label: '2.0x' },
 ];
 
-export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps) {
+export default function WebTtsPlayer({
+  verses,
+  title,
+  lang,
+  nextChapterUrl,
+}: WebTtsPlayerProps) {
+  const router = useRouter();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [currentVerseIndex, setCurrentVerseIndex] = useState<number | null>(null);
@@ -45,7 +53,6 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Show floating player when inline card is scrolled above the viewport
         const isAboveViewport = !entry.isIntersecting && entry.boundingClientRect.top < 0;
         setShowFloating(isAboveViewport);
       },
@@ -63,12 +70,24 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      synthRef.current = window.speechSynthesis;
-      updateVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
+    if (typeof window !== 'undefined') {
+      // Restore saved speech rate if available
+      const savedRate = sessionStorage.getItem('tts_speech_rate');
+      if (savedRate) {
+        const parsed = parseFloat(savedRate);
+        if (!isNaN(parsed) && parsed > 0) {
+          setSpeechRate(parsed);
+          rateRef.current = parsed;
+        }
+      }
+
+      if ('speechSynthesis' in window) {
+        synthRef.current = window.speechSynthesis;
         updateVoices();
-      };
+        window.speechSynthesis.onvoiceschanged = () => {
+          updateVoices();
+        };
+      }
     }
 
     return () => {
@@ -105,8 +124,11 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
     }
   };
 
-  const stopAudio = useCallback(() => {
+  const stopAudio = useCallback((keepAutoPlayFlag = false) => {
     isPlayingRef.current = false;
+    if (!keepAutoPlayFlag && typeof window !== 'undefined') {
+      sessionStorage.removeItem('tts_auto_play');
+    }
     if (synthRef.current) {
       synthRef.current.cancel();
     }
@@ -151,7 +173,14 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
       if (!isPlayingRef.current) return;
 
       if (index >= verses.length) {
-        stopAudio();
+        if (nextChapterUrl && typeof window !== 'undefined') {
+          sessionStorage.setItem('tts_auto_play', '1');
+          sessionStorage.setItem('tts_speech_rate', String(rateRef.current));
+          stopAudio(true);
+          router.push(nextChapterUrl);
+        } else {
+          stopAudio();
+        }
         return;
       }
 
@@ -162,8 +191,9 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
       applyKaraokeHighlight(verses[index].verse);
 
       const v = verses[index];
-      const prefix = lang === 'vi' ? `Câu ${v.verse}. ` : `${t.verse} ${v.verse}. `;
-      const fullText = prefix + v.text;
+      // Before reading verse 1 (index === 0), read the book & chapter heading (e.g. "Giăng Chương 1. ").
+      // Do not prepend "Câu 1", "Câu 2", etc.
+      const fullText = index === 0 ? `${title}. ${v.text}` : v.text;
 
       const matchedVoice = findMatchingVoice(voicesRef.current, lang);
 
@@ -240,16 +270,35 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
         });
       }
     },
-    [lang, langConfig.voiceLang, stopAudio, t.verse, verses]
+    [lang, langConfig.voiceLang, nextChapterUrl, router, stopAudio, title, verses]
   );
+
+  // Auto-start playback if navigated from previous chapter completion
+  useEffect(() => {
+    if (typeof window === 'undefined' || verses.length === 0) return;
+    const shouldAutoPlay = sessionStorage.getItem('tts_auto_play') === '1';
+    if (shouldAutoPlay) {
+      sessionStorage.removeItem('tts_auto_play');
+      const timer = setTimeout(() => {
+        stopAudio(true);
+        isPlayingRef.current = true;
+        setIsPlaying(true);
+        setIsPaused(false);
+        speakVerseAtIndex(0);
+      }, 450);
+      return () => clearTimeout(timer);
+    }
+  }, [title, verses, speakVerseAtIndex, stopAudio]);
 
   const handleSpeedChange = (newRate: number) => {
     setSpeechRate(newRate);
     rateRef.current = newRate;
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('tts_speech_rate', String(newRate));
+    }
     if (audioRef.current) {
       audioRef.current.playbackRate = newRate;
     } else if (isPlayingRef.current && synthRef.current) {
-      // Restart current verse immediately at the new speed for Web Speech API
       synthRef.current.cancel();
       speakVerseAtIndex(activeIndexRef.current);
     }
@@ -286,6 +335,9 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
     }
     if (synthRef.current) {
       synthRef.current.pause();
+    }
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('tts_auto_play');
     }
     setIsPaused(true);
     setIsPlaying(false);
@@ -372,7 +424,7 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
             {/* Stop Button */}
             {(isPlaying || isPaused) && (
               <button
-                onClick={stopAudio}
+                onClick={() => stopAudio()}
                 className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer"
               >
                 ⏹ {t.ttsStop}
@@ -462,7 +514,7 @@ export default function WebTtsPlayer({ verses, title, lang }: WebTtsPlayerProps)
 
               {(isPlaying || isPaused) && (
                 <button
-                  onClick={stopAudio}
+                  onClick={() => stopAudio()}
                   className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold px-2.5 py-1.5 rounded-xl transition cursor-pointer"
                   title={t.ttsStop}
                 >

@@ -37,7 +37,6 @@ export default function ChapterVersesReader({
 
   // Navigation target from URL ?highlight=... or #cau-...
   const [navTargetVerse, setNavTargetVerse] = useState<number | null>(null);
-  const [justArrived, setJustArrived] = useState(false);
   const scrolledRef = useRef(false);
 
   // Active interactive verse
@@ -77,7 +76,6 @@ export default function ChapterVersesReader({
     if (targetNum && !scrolledRef.current) {
       setNavTargetVerse(targetNum);
       setActiveVerse(targetNum);
-      setJustArrived(true);
       scrolledRef.current = true;
 
       setTimeout(() => {
@@ -86,12 +84,6 @@ export default function ChapterVersesReader({
           el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 150);
-
-      const pulseTimer = setTimeout(() => {
-        setJustArrived(false);
-      }, 3500);
-
-      return () => clearTimeout(pulseTimer);
     }
   }, [searchParams]);
 
@@ -104,12 +96,10 @@ export default function ChapterVersesReader({
           const num = parseInt(match[1], 10);
           setNavTargetVerse(num);
           setActiveVerse(num);
-          setJustArrived(true);
           const el = document.getElementById(`cau-${num}`);
           if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-          setTimeout(() => setJustArrived(false), 3000);
         }
       }
     };
@@ -230,9 +220,7 @@ export default function ChapterVersesReader({
               backgroundColor: userHighlight && !isNavTarget ? `${userHighlight.color}40` : undefined,
               borderLeftColor: userHighlight && !isNavTarget ? userHighlight.color : undefined,
             }}
-            className={`group p-3 rounded-2xl transition-all cursor-pointer relative scroll-mt-28 flex flex-col gap-2 ${dynamicBg} ${dynamicBorderLeft} ${
-              isNavTarget && justArrived ? 'animate-pulse' : ''
-            } ${
+            className={`group p-3 rounded-2xl transition-colors cursor-pointer relative scroll-mt-28 flex flex-col gap-2 ${dynamicBg} ${dynamicBorderLeft} ${
               !userHighlight && !isNavTarget ? 'hover:bg-amber-50/50' : ''
             }`}
           >
@@ -353,7 +341,7 @@ export default function ChapterVersesReader({
             {isActive && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="ml-11 mt-1 p-2 bg-white/95 backdrop-blur-md rounded-2xl border border-stone-300 shadow-lg flex items-center flex-wrap gap-2 font-sans text-xs animate-in fade-in zoom-in-95 duration-100 z-10"
+                className="ml-11 mt-1 p-2 bg-white/95 backdrop-blur-md rounded-2xl border border-stone-300 shadow-lg flex items-center flex-wrap gap-2 font-sans text-xs z-10"
               >
                 {/* 5 Color Palette Swatches */}
                 <div className="flex items-center gap-1.5 px-1 py-0.5 border-r border-stone-200 pr-2">

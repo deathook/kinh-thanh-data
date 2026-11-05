@@ -94,6 +94,12 @@ export default async function MultilingualChapterPage({ params }: PageProps) {
   // Prev / Next Navigation
   const hasPrev = chNum > 1;
   const hasNext = chNum < book.chapters;
+  const nextBook = !hasNext && book.id < 66 ? allBooks.find((b) => b.id === book.id + 1) : undefined;
+  const nextChapterUrl = hasNext
+    ? `/${lang}/kinh-thanh/${book.slug}/${chNum + 1}`
+    : nextBook
+    ? `/${lang}/kinh-thanh/${nextBook.slug}/1`
+    : undefined;
 
   // JSON-LD Structured Data
   const jsonLd = {
@@ -164,8 +170,9 @@ export default async function MultilingualChapterPage({ params }: PageProps) {
         {/* Enhanced Native Web Speech TTS Player */}
         <WebTtsPlayer
           verses={verses.map((v) => ({ verse: v.verse, text: v.text }))}
-          title={`${book.name} ${chNum}`}
+          title={`${book.name} ${t.chapter} ${chNum}`}
           lang={lang}
+          nextChapterUrl={nextChapterUrl}
         />
 
         {/* Interactive Verses Reading View with Highlights & Cloud Sync */}

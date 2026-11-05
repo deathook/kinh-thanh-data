@@ -34,15 +34,19 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
     signInWithGoogle,
     signInWithEmail,
     registerWithEmail,
-    resetPasswordWithEmail,
+    requestPasswordResetOtp,
+    confirmPasswordResetWithOtp,
+    confirmPasswordResetWithOobCode,
     isSyncing,
   } = useAuth();
 
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
+  const [forgotStep, setForgotStep] = useState<'request' | 'verify'>('request');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [otpCode, setOtpCode] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -114,56 +118,94 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
       return;
     }
 
+    // 1. FORGOT PASSWORD FLOW (2-STEP: REQUEST 6-DIGIT CODE -> VERIFY & CHANGE PASSWORD)
     if (mode === 'forgot') {
-      if (resetCooldown > 0) {
-        setErrorMsg(
-          isVi
-            ? `Vui lòng đợi ${resetCooldown} giây trước khi gửi lại yêu cầu.`
-            : `Please wait ${resetCooldown}s before sending another request.`
-        );
+      if (forgotStep === 'request') {
+        if (resetCooldown > 0) {
+          setErrorMsg(
+            isVi
+              ? `Vui lòng đợi ${resetCooldown} giây trước khi gửi lại mã.`
+              : `Please wait ${resetCooldown}s before requesting another code.`
+          );
+          return;
+        }
+
+        if (!email.trim() || !email.includes('@')) {
+          setErrorMsg(isVi ? 'Vui lòng nhập địa chỉ email của tài khoản.' : 'Please enter your account email.');
+          return;
+        }
+
+        if (parseInt(captchaInput.trim(), 10) !== captcha.answer) {
+          setErrorMsg(isVi ? 'Mã xác thực Captcha không đúng. Vui lòng tính lại!' : 'Incorrect Captcha answer. Please try again!');
+          refreshCaptcha();
+          return;
+        }
+
+        setSubmitting(true);
+        try {
+          await requestPasswordResetOtp(email.trim());
+          setResetCooldown(60);
+          setForgotStep('verify');
+          setOtpCode('');
+          setPassword('');
+          setConfirmPassword('');
+          setSuccessMsg(
+            isVi
+              ? `Hệ thống đã gửi mã xác thực 6 số (bằng Tiếng Anh) tới ${email.trim()}. Vui lòng kiểm tra hộp thư (hoặc mục Thư rác/Spam) và nhập mã 6 số bên dưới để đổi mật khẩu.`
+              : `A 6-digit verification code (in English) has been sent to ${email.trim()}. Please enter the code below to set your new password.`
+          );
+        } catch (err: unknown) {
+          refreshCaptcha();
+          const error = err as { message?: string };
+          setErrorMsg(error?.message || (isVi ? 'Không thể gửi mã xác thực, vui lòng thử lại.' : 'Failed to send verification code.'));
+        } finally {
+          setSubmitting(false);
+        }
         return;
       }
 
-      if (!email.trim()) {
-        setErrorMsg(isVi ? 'Vui lòng nhập địa chỉ email của tài khoản.' : 'Please enter your account email.');
+      // Step 2: Verify 6-digit code & set new password
+      if (!otpCode.trim()) {
+        setErrorMsg(isVi ? 'Vui lòng nhập mã xác thực 6 số nhận được trong email.' : 'Please enter the 6-digit verification code.');
         return;
       }
-
-      // Verify Captcha
-      if (parseInt(captchaInput.trim(), 10) !== captcha.answer) {
-        setErrorMsg(isVi ? 'Mã xác thực Captcha không đúng. Vui lòng tính lại!' : 'Incorrect Captcha answer. Please try again!');
-        refreshCaptcha();
+      if (!password || password.length < 6) {
+        setErrorMsg(isVi ? 'Mật khẩu mới tối thiểu 6 ký tự.' : 'New password must be at least 6 characters.');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setErrorMsg(isVi ? 'Mật khẩu nhập lại không khớp.' : 'Passwords do not match.');
         return;
       }
 
       setSubmitting(true);
       try {
-        await resetPasswordWithEmail(email.trim());
-        setResetCooldown(60); // 60s anti-spam cooldown
-        refreshCaptcha();
+        const trimmedCode = otpCode.trim();
+        if (/^\d{6}$/.test(trimmedCode)) {
+          await confirmPasswordResetWithOtp(email.trim(), trimmedCode, password);
+        } else {
+          // Also support if user pasted Firebase reset code/link
+          await confirmPasswordResetWithOobCode(trimmedCode, password);
+        }
+        setMode('login');
+        setForgotStep('request');
+        setPassword('');
+        setConfirmPassword('');
         setSuccessMsg(
           isVi
-            ? `Đã gửi email khôi phục mật khẩu (bằng Tiếng Anh) tới ${email.trim()}. Vui lòng mở email và bấm vào đường link để đặt lại mật khẩu mới.`
-            : `Password reset link (in English) has been sent to ${email.trim()}. Please open the email and click the link to set a new password.`
+            ? 'Đã đổi mật khẩu thành công! Bây giờ bạn có thể đăng nhập bằng mật khẩu mới.'
+            : 'Password reset successfully! You can now sign in with your new password.'
         );
       } catch (err: unknown) {
-        refreshCaptcha();
-        const error = err as { code?: string; message?: string };
-        if (error?.code === 'auth/user-not-found') {
-          setErrorMsg(isVi ? 'Không tìm thấy tài khoản với email này.' : 'No account found with this email.');
-        } else if (error?.code === 'auth/invalid-email') {
-          setErrorMsg(isVi ? 'Địa chỉ email không hợp lệ.' : 'Invalid email address.');
-        } else if (error?.code === 'auth/too-many-requests') {
-          setErrorMsg(isVi ? 'Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau ít phút.' : 'Too many requests. Please try again later.');
-        } else {
-          setErrorMsg(error?.message || (isVi ? 'Không thể gửi email khôi phục, vui lòng thử lại.' : 'Failed to send reset email.'));
-        }
+        const error = err as { message?: string };
+        setErrorMsg(error?.message || (isVi ? 'Mã xác thực không hợp lệ hoặc đã hết hạn.' : 'Invalid or expired verification code.'));
       } finally {
         setSubmitting(false);
       }
       return;
     }
 
+    // 2. REGISTER FLOW
     if (mode === 'register') {
       if (!fullName.trim()) {
         setErrorMsg(isVi ? 'Vui lòng nhập họ và tên.' : 'Please enter your full name.');
@@ -181,13 +223,13 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
         setErrorMsg(isVi ? 'Mật khẩu nhập lại không khớp.' : 'Passwords do not match.');
         return;
       }
-      // Verify Captcha on registration to prevent spam accounts
       if (parseInt(captchaInput.trim(), 10) !== captcha.answer) {
         setErrorMsg(isVi ? 'Mã xác thực Captcha không đúng. Vui lòng tính lại!' : 'Incorrect Captcha answer. Please try again!');
         refreshCaptcha();
         return;
       }
     } else {
+      // 3. LOGIN FLOW
       if (!email.trim() || !password) {
         setErrorMsg(isVi ? 'Vui lòng điền đầy đủ email và mật khẩu.' : 'Please enter email and password.');
         return;
@@ -251,8 +293,8 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
           <h2 className="text-xl font-bold font-serif leading-tight">
             {mode === 'forgot'
               ? isVi
-                ? 'Quên Mật Khẩu'
-                : 'Forgot Password'
+                ? 'Khôi Phục Mật Khẩu Bằng Mã 6 Số'
+                : 'Reset Password with 6-Digit Code'
               : mode === 'register'
               ? isVi
                 ? 'Tạo Tài Khoản Mới'
@@ -264,8 +306,8 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
           <p className="text-xs text-amber-200/80 mt-1 leading-relaxed">
             {mode === 'forgot'
               ? isVi
-                ? 'Nhập email tài khoản của bạn. Hệ thống sẽ gửi một email (bằng Tiếng Anh) chứa đường link để bạn bấm vào và đặt lại mật khẩu mới.'
-                : 'Enter your email address. We will send an email in English with a link to reset your password.'
+                ? 'Hệ thống sẽ gửi một email bằng Tiếng Anh chứa mã xác thực 6 số để bạn nhập trực tiếp và đặt mật khẩu mới.'
+                : 'We will send an email in English containing a 6-digit verification code to reset your password.'
               : isVi
               ? 'Lưu trữ ghi chú, câu tô màu & lời cầu nguyện. Tự động đồng bộ với App Android.'
               : 'Sync highlights, personal notes & prayer journal across Web and Android App.'}
@@ -366,12 +408,60 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
               <input
                 type="email"
                 required
+                disabled={mode === 'forgot' && forgotStep === 'verify'}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your.email@gmail.com"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:border-amber-700 focus:ring-2 focus:ring-amber-200 text-sm outline-none transition"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:border-amber-700 focus:ring-2 focus:ring-amber-200 text-sm outline-none transition disabled:bg-stone-100"
               />
             </div>
+
+            {mode === 'forgot' && forgotStep === 'verify' && (
+              <>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    {isVi ? 'Mã xác thực 6 số (trong Email)' : '6-Digit Verification Code'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    placeholder="123456"
+                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-amber-500 bg-amber-50/40 focus:border-amber-700 focus:ring-2 focus:ring-amber-200 text-base font-mono font-bold tracking-widest text-center outline-none transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    {isVi ? 'Mật khẩu mới (tối thiểu 6 ký tự)' : 'New Password'}
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:border-amber-700 focus:ring-2 focus:ring-amber-200 text-sm outline-none transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    {isVi ? 'Nhập lại mật khẩu mới' : 'Confirm New Password'}
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:border-amber-700 focus:ring-2 focus:ring-amber-200 text-sm outline-none transition"
+                  />
+                </div>
+              </>
+            )}
 
             {mode !== 'forgot' && (
               <div>
@@ -384,6 +474,7 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
                       type="button"
                       onClick={() => {
                         setMode('forgot');
+                        setForgotStep('request');
                         setErrorMsg(null);
                         setSuccessMsg(null);
                       }}
@@ -420,8 +511,8 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
               </div>
             )}
 
-            {/* Anti-spam Captcha Widget for Forgot Password & Registration */}
-            {(mode === 'forgot' || mode === 'register') && (
+            {/* Anti-spam Captcha Widget for Forgot Password (step 1) & Registration */}
+            {((mode === 'forgot' && forgotStep === 'request') || mode === 'register') && (
               <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/90 space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-stone-700 flex items-center gap-1.5">
@@ -455,7 +546,7 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
 
             <button
               type="submit"
-              disabled={submitting || (mode === 'forgot' && resetCooldown > 0)}
+              disabled={submitting || (mode === 'forgot' && forgotStep === 'request' && resetCooldown > 0)}
               className="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-2.5 px-4 rounded-xl transition shadow-xs cursor-pointer disabled:opacity-60 text-sm mt-1"
             >
               {submitting
@@ -463,13 +554,17 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
                   ? 'Đang xử lý...'
                   : 'Processing...'
                 : mode === 'forgot'
-                ? resetCooldown > 0
-                  ? isVi
-                    ? `Gửi lại sau (${resetCooldown}s)`
-                    : `Resend in (${resetCooldown}s)`
+                ? forgotStep === 'request'
+                  ? resetCooldown > 0
+                    ? isVi
+                      ? `Gửi lại mã sau (${resetCooldown}s)`
+                      : `Resend in (${resetCooldown}s)`
+                    : isVi
+                    ? 'Gửi Mã Xác Thực 6 Số Qua Email'
+                    : 'Send 6-Digit Verification Code'
                   : isVi
-                  ? 'Gửi Link Đặt Lại Mật Khẩu'
-                  : 'Send Password Reset Link'
+                  ? 'Xác Nhận Mã & Đổi Mật Khẩu'
+                  : 'Verify Code & Change Password'
                 : mode === 'login'
                 ? isVi
                   ? 'Đăng Nhập'
@@ -478,6 +573,41 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
                 ? 'Tạo Tài Khoản'
                 : 'Create Account'}
             </button>
+
+            {mode === 'forgot' && forgotStep === 'request' && (
+              <div className="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!email.trim()) {
+                      setErrorMsg(isVi ? 'Vui lòng nhập email của bạn trước.' : 'Please enter your email first.');
+                      return;
+                    }
+                    setForgotStep('verify');
+                    setErrorMsg(null);
+                  }}
+                  className="text-[11px] font-semibold text-stone-500 hover:text-amber-800 hover:underline cursor-pointer"
+                >
+                  {isVi ? 'Đã có mã xác thực 6 số? Nhập mã ngay →' : 'Already have a 6-digit code? Enter code →'}
+                </button>
+              </div>
+            )}
+
+            {mode === 'forgot' && forgotStep === 'verify' && (
+              <div className="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotStep('request');
+                    setErrorMsg(null);
+                    setSuccessMsg(null);
+                  }}
+                  className="text-[11px] font-semibold text-amber-800 hover:underline cursor-pointer"
+                >
+                  {isVi ? '← Gửi lại mã xác thực 6 số khác' : '← Request a new 6-digit code'}
+                </button>
+              </div>
+            )}
           </form>
 
           {/* Toggle Login / Register / Forgot */}
@@ -504,6 +634,7 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
                   type="button"
                   onClick={() => {
                     setMode('login');
+                    setForgotStep('request');
                     setErrorMsg(null);
                     setSuccessMsg(null);
                   }}

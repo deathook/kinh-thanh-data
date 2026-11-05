@@ -157,11 +157,24 @@ function mergeCloudData(local: UserCloudData, remote: UserCloudData): UserCloudD
 }
 
 /**
+ * Normalize an email or UID into a deterministic, safe Firestore document ID
+ * so that Google login and Email/Password login for the same email share the exact same cloud document.
+ */
+export function getUserDocId(emailOrUid: string): string {
+  const clean = (emailOrUid || 'guest').trim().toLowerCase();
+  if (clean.includes('@')) {
+    return clean.replace(/[^a-z0-9]/g, '_');
+  }
+  return clean;
+}
+
+/**
  * Full two-way sync with Firebase Cloud Firestore
  */
-export async function syncWithFirebase(user: User): Promise<UserCloudData> {
+export async function syncWithFirebase(user: { uid: string; email: string | null; displayName?: string | null; photoURL?: string | null; providerData?: Array<{ providerId: string }> }): Promise<UserCloudData> {
   const local = getLocalCloudData();
-  const userDocRef = doc(db, 'users', user.uid);
+  const primaryId = getUserDocId(user.email || user.uid);
+  const userDocRef = doc(db, 'users', primaryId);
 
   try {
     const docSnap = await getDoc(userDocRef);
@@ -182,32 +195,63 @@ export async function syncWithFirebase(user: User): Promise<UserCloudData> {
       }
     }
 
+    // Also check legacy UID document if different from primaryId so no previous data is lost
+    if (user.uid && user.uid !== primaryId) {
+      try {
+        const legacyRef = doc(db, 'users', user.uid);
+        const legacySnap = await getDoc(legacyRef);
+        if (legacySnap.exists()) {
+          const lData = legacySnap.data();
+          const lBackup = lData.backup_data;
+          if (lBackup) {
+            const legacyRemote: UserCloudData = {
+              user: user.email || user.uid,
+              synced_at: lData.updated_at || new Date().toISOString(),
+              highlights: Array.isArray(lBackup.highlights) ? lBackup.highlights : [],
+              notes: Array.isArray(lBackup.notes) ? lBackup.notes : [],
+              prayers: Array.isArray(lBackup.prayers) ? lBackup.prayers : [],
+            };
+            merged = mergeCloudData(merged, legacyRemote);
+          }
+        }
+      } catch {
+        // Ignore legacy check error
+      }
+    }
+
     merged.user = user.email || user.uid;
     merged.synced_at = new Date().toISOString();
 
-    // Push merged back to Firestore
-    await setDoc(
-      userDocRef,
-      {
-        email: user.email,
-        displayName: user.displayName || user.email?.split('@')[0],
-        photoUrl: user.photoURL,
-        provider: user.providerData?.[0]?.providerId || 'google',
-        last_sync: serverTimestamp(),
-        updated_at: merged.synced_at,
-        highlights_count: merged.highlights.length,
-        notes_count: merged.notes.length,
-        prayers_count: merged.prayers.length,
-        backup_data: {
-          user: merged.user,
-          synced_at: merged.synced_at,
-          highlights: merged.highlights,
-          notes: merged.notes,
-          prayers: merged.prayers,
-        },
+    const docPayload = {
+      email: user.email,
+      displayName: user.displayName || user.email?.split('@')[0],
+      photoUrl: user.photoURL,
+      provider: user.providerData?.[0]?.providerId || 'google',
+      last_sync: serverTimestamp(),
+      updated_at: merged.synced_at,
+      highlights_count: merged.highlights.length,
+      notes_count: merged.notes.length,
+      prayers_count: merged.prayers.length,
+      backup_data: {
+        user: merged.user,
+        synced_at: merged.synced_at,
+        highlights: merged.highlights,
+        notes: merged.notes,
+        prayers: merged.prayers,
       },
-      { merge: true }
-    );
+    };
+
+    // Push merged back to primary Firestore document
+    await setDoc(userDocRef, docPayload, { merge: true });
+
+    // Also keep UID doc in sync if present
+    if (user.uid && user.uid !== primaryId) {
+      try {
+        await setDoc(doc(db, 'users', user.uid), docPayload, { merge: true });
+      } catch {
+        // Ignore
+      }
+    }
 
     saveLocalCloudData(merged);
     setLastSyncTime(merged.synced_at);
@@ -222,31 +266,32 @@ export async function syncWithFirebase(user: User): Promise<UserCloudData> {
 /**
  * Push current local changes to cloud if user is logged in
  */
-export async function pushCurrentDataToCloud(user: User | null, data: UserCloudData): Promise<void> {
+export async function pushCurrentDataToCloud(user: { uid: string; email: string | null } | null, data: UserCloudData): Promise<void> {
   saveLocalCloudData(data);
   if (!user) return;
 
   try {
-    const userDocRef = doc(db, 'users', user.uid);
-    await setDoc(
-      userDocRef,
-      {
-        email: user.email,
-        last_sync: serverTimestamp(),
-        updated_at: new Date().toISOString(),
-        highlights_count: data.highlights.length,
-        notes_count: data.notes.length,
-        prayers_count: data.prayers.length,
-        backup_data: {
-          user: user.email || user.uid,
-          synced_at: new Date().toISOString(),
-          highlights: data.highlights,
-          notes: data.notes,
-          prayers: data.prayers,
-        },
+    const primaryId = getUserDocId(user.email || user.uid);
+    const userDocRef = doc(db, 'users', primaryId);
+    const payload = {
+      email: user.email,
+      last_sync: serverTimestamp(),
+      updated_at: new Date().toISOString(),
+      highlights_count: data.highlights.length,
+      notes_count: data.notes.length,
+      prayers_count: data.prayers.length,
+      backup_data: {
+        user: user.email || user.uid,
+        synced_at: new Date().toISOString(),
+        highlights: data.highlights,
+        notes: data.notes,
+        prayers: data.prayers,
       },
-      { merge: true }
-    );
+    };
+    await setDoc(userDocRef, payload, { merge: true });
+    if (user.uid && user.uid !== primaryId) {
+      await setDoc(doc(db, 'users', user.uid), payload, { merge: true });
+    }
     setLastSyncTime(new Date().toISOString());
   } catch (e) {
     console.warn('Silent cloud push warning:', e);
@@ -257,7 +302,9 @@ export async function pushCurrentDataToCloud(user: User | null, data: UserCloudD
 // CRUD Operations
 // -------------------------------------------------------------
 
-export function addOrUpdateHighlight(user: User | null, record: HighlightRecord) {
+export type SyncUserLike = { uid: string; email: string | null } | null;
+
+export function addOrUpdateHighlight(user: SyncUserLike, record: HighlightRecord) {
   const current = getLocalCloudData();
   const index = current.highlights.findIndex((h) => h.verse_key === record.verse_key);
   if (index >= 0) {
@@ -268,13 +315,13 @@ export function addOrUpdateHighlight(user: User | null, record: HighlightRecord)
   pushCurrentDataToCloud(user, current);
 }
 
-export function deleteHighlight(user: User | null, verseKey: string) {
+export function deleteHighlight(user: SyncUserLike, verseKey: string) {
   const current = getLocalCloudData();
   current.highlights = current.highlights.filter((h) => h.verse_key !== verseKey);
   pushCurrentDataToCloud(user, current);
 }
 
-export function addOrUpdateNote(user: User | null, record: NoteRecord) {
+export function addOrUpdateNote(user: SyncUserLike, record: NoteRecord) {
   const current = getLocalCloudData();
   const index = current.notes.findIndex((n) => n.verse_key === record.verse_key);
   if (index >= 0) {
@@ -285,13 +332,13 @@ export function addOrUpdateNote(user: User | null, record: NoteRecord) {
   pushCurrentDataToCloud(user, current);
 }
 
-export function deleteNote(user: User | null, verseKey: string) {
+export function deleteNote(user: SyncUserLike, verseKey: string) {
   const current = getLocalCloudData();
   current.notes = current.notes.filter((n) => n.verse_key !== verseKey);
   pushCurrentDataToCloud(user, current);
 }
 
-export function addOrUpdatePrayer(user: User | null, prayer: PrayerRecord) {
+export function addOrUpdatePrayer(user: SyncUserLike, prayer: PrayerRecord) {
   const current = getLocalCloudData();
   const index = current.prayers.findIndex((p) => String(p.id) === String(prayer.id));
   if (index >= 0) {
@@ -302,7 +349,7 @@ export function addOrUpdatePrayer(user: User | null, prayer: PrayerRecord) {
   pushCurrentDataToCloud(user, current);
 }
 
-export function deletePrayer(user: User | null, id: string | number) {
+export function deletePrayer(user: SyncUserLike, id: string | number) {
   const current = getLocalCloudData();
   current.prayers = current.prayers.filter((p) => String(p.id) !== String(id));
   pushCurrentDataToCloud(user, current);

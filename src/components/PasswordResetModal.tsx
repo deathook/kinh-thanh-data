@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { verifyPasswordResetCode, confirmPasswordReset } from 'firebase/auth';
+import { verifyPasswordResetCode } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/lib/AuthContext';
 
 function PasswordResetContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { setAuthModalOpen } = useAuth();
+  const { setAuthModalOpen, confirmPasswordResetWithOobCode } = useAuth();
 
   const mode = searchParams.get('mode');
   const oobCode = searchParams.get('oobCode');
@@ -75,7 +75,7 @@ function PasswordResetContent() {
     setErrorMsg(null);
     setSubmitting(true);
     try {
-      await confirmPasswordReset(auth, oobCode, newPassword);
+      await confirmPasswordResetWithOobCode(oobCode, newPassword);
       setSuccess(true);
     } catch (err: unknown) {
       const error = err as { code?: string; message?: string };

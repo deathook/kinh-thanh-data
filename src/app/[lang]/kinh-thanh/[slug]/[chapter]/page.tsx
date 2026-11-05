@@ -168,10 +168,11 @@ export default async function MultilingualChapterPage({ params }: PageProps) {
           lang={lang}
         />
 
-        {/* Interactive Verses Reading View with Highlights */}
+        {/* Interactive Verses Reading View with Highlights & Cloud Sync */}
         <ChapterVersesReader
           verses={verses.map((v) => ({ id: v.id, verse: v.verse, text: v.text }))}
           lang={lang}
+          bookId={book.id}
           bookName={book.name}
           chapter={chNum}
         />

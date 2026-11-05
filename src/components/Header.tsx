@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import LanguageSwitcher from './LanguageSwitcher';
 import SearchModal from './SearchModal';
+import UserAuthButton from './UserAuthButton';
 import { getTranslation, getLangConfig } from '@/lib/i18n';
 
 interface HeaderProps {
@@ -70,6 +71,9 @@ export default function Header({
             chapter={chapter}
             bookSlugsByLang={bookSlugsByLang}
           />
+
+          {/* User Account & Cloud Sync */}
+          <UserAuthButton currentLang={currentLang} />
 
           <a
             href="/app-release.apk"

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Lora, Plus_Jakarta_Sans } from 'next/font/google';
 import Script from 'next/script';
+import ClientProviders from '@/components/ClientProviders';
 import './globals.css';
 
 const lora = Lora({
@@ -111,7 +112,9 @@ export default function RootLayout({
           `}
         </Script>
 
-        {children}
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

@@ -111,9 +111,11 @@ export default function ChapterVersesReader({
   const handleVerseClick = (verseNum: number) => {
     if (activeVerse === verseNum) {
       setActiveVerse(null);
+      setNavTargetVerse(null);
       setEditingNoteVerse(null);
     } else {
       setActiveVerse(verseNum);
+      setNavTargetVerse(verseNum);
       setEditingNoteVerse(null);
       if (typeof window !== 'undefined' && window.history) {
         window.history.replaceState(null, '', `#cau-${verseNum}`);
@@ -203,10 +205,10 @@ export default function ChapterVersesReader({
 
         if (userHighlight) {
           dynamicBg = '';
-          dynamicBorderLeft = 'border-l-4';
-        }
-
-        if (isNavTarget) {
+          dynamicBorderLeft = isNavTarget
+            ? 'border-l-4 shadow-sm ring-1 ring-amber-400/80'
+            : 'border-l-4';
+        } else if (isNavTarget) {
           dynamicBg = 'bg-gradient-to-r from-amber-100 via-amber-100/90 to-amber-50/70';
           dynamicBorderLeft = 'border-l-4 border-amber-700 shadow-sm ring-1 ring-amber-400/80';
         }
@@ -217,8 +219,8 @@ export default function ChapterVersesReader({
             id={`cau-${v.verse}`}
             onClick={() => handleVerseClick(v.verse)}
             style={{
-              backgroundColor: userHighlight && !isNavTarget ? `${userHighlight.color}40` : undefined,
-              borderLeftColor: userHighlight && !isNavTarget ? userHighlight.color : undefined,
+              backgroundColor: userHighlight ? `${userHighlight.color}50` : undefined,
+              borderLeftColor: userHighlight ? userHighlight.color : undefined,
             }}
             className={`group p-3 rounded-2xl transition-colors cursor-pointer relative scroll-mt-28 flex flex-col gap-2 ${dynamicBg} ${dynamicBorderLeft} ${
               !userHighlight && !isNavTarget ? 'hover:bg-amber-50/50' : ''

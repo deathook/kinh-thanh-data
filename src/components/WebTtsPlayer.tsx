@@ -11,6 +11,8 @@ interface WebTtsPlayerProps {
   nextChapterUrl?: string;
 }
 
+type PlayMode = 'next' | 'repeat' | 'stop';
+
 const SPEED_OPTIONS = [
   { value: 0.5, label: '0.5x' },
   { value: 0.75, label: '0.75x' },
@@ -32,6 +34,7 @@ export default function WebTtsPlayer({
   const [isPaused, setIsPaused] = useState(false);
   const [currentVerseIndex, setCurrentVerseIndex] = useState<number | null>(null);
   const [speechRate, setSpeechRate] = useState<number>(1.0);
+  const [playMode, setPlayMode] = useState<PlayMode>('next');
   const [isSupported] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
 
@@ -41,10 +44,30 @@ export default function WebTtsPlayer({
   const activeIndexRef = useRef<number>(0);
   const isPlayingRef = useRef<boolean>(false);
   const rateRef = useRef<number>(1.0);
+  const playModeRef = useRef<PlayMode>('next');
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
 
   const langConfig = getLangConfig(lang);
   const t = getTranslation(lang);
+  const isVi = lang === 'vi';
+
+  const playModeOptions: Array<{ value: PlayMode; label: string; shortLabel: string }> = [
+    {
+      value: 'next',
+      label: isVi ? '⏭ Tự chuyển chương' : '⏭ Auto next chapter',
+      shortLabel: isVi ? '⏭ Chuyển chương' : '⏭ Next',
+    },
+    {
+      value: 'repeat',
+      label: isVi ? '🔁 Lặp lại chương này' : '🔁 Repeat chapter',
+      shortLabel: isVi ? '🔁 Lặp lại' : '🔁 Repeat',
+    },
+    {
+      value: 'stop',
+      label: isVi ? '⏹ Dừng khi hết chương' : '⏹ Stop at end',
+      shortLabel: isVi ? '⏹ Dừng hết chương' : '⏹ Stop',
+    },
+  ];
 
   // Detect when inline player card scrolls out of view to show floating bottom player
   useEffect(() => {
@@ -79,6 +102,13 @@ export default function WebTtsPlayer({
           setSpeechRate(parsed);
           rateRef.current = parsed;
         }
+      }
+
+      // Restore saved play mode if available (default: 'next')
+      const savedMode = sessionStorage.getItem('tts_play_mode') as PlayMode | null;
+      if (savedMode === 'next' || savedMode === 'repeat' || savedMode === 'stop') {
+        setPlayMode(savedMode);
+        playModeRef.current = savedMode;
       }
 
       if ('speechSynthesis' in window) {
@@ -173,9 +203,13 @@ export default function WebTtsPlayer({
       if (!isPlayingRef.current) return;
 
       if (index >= verses.length) {
-        if (nextChapterUrl && typeof window !== 'undefined') {
+        const mode = playModeRef.current;
+        if (mode === 'repeat') {
+          speakVerseAtIndex(0);
+        } else if (mode === 'next' && nextChapterUrl && typeof window !== 'undefined') {
           sessionStorage.setItem('tts_auto_play', '1');
           sessionStorage.setItem('tts_speech_rate', String(rateRef.current));
+          sessionStorage.setItem('tts_play_mode', mode);
           stopAudio(true);
           router.push(nextChapterUrl);
         } else {
@@ -304,6 +338,14 @@ export default function WebTtsPlayer({
     }
   };
 
+  const handlePlayModeChange = (newMode: PlayMode) => {
+    setPlayMode(newMode);
+    playModeRef.current = newMode;
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('tts_play_mode', newMode);
+    }
+  };
+
   const startPlaying = () => {
     if (verses.length === 0) return;
 
@@ -387,12 +429,26 @@ export default function WebTtsPlayer({
           </div>
 
           {/* Right: Controls */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end flex-wrap">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+            {/* Play Mode Selector: Next (default), Repeat, Stop */}
+            <select
+              value={playMode}
+              onChange={(e) => handlePlayModeChange(e.target.value as PlayMode)}
+              className="bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-2.5 py-2 outline-none focus:border-amber-700 transition cursor-pointer font-medium shadow-2xs"
+              title={isVi ? 'Chế độ khi đọc hết chương' : 'End of chapter behavior'}
+            >
+              {playModeOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+
             {/* Speed Selector: 0.5x, 0.75x, 1.0x, 1.25x, 1.5x, 1.75x, 2.0x */}
             <select
               value={speechRate.toString()}
               onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
-              className="bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-3 py-2 outline-none focus:border-amber-700 transition cursor-pointer font-medium shadow-2xs"
+              className="bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-2.5 py-2 outline-none focus:border-amber-700 transition cursor-pointer font-medium shadow-2xs"
               title="Tốc độ đọc / Speed"
             >
               {SPEED_OPTIONS.map((opt) => (
@@ -453,11 +509,11 @@ export default function WebTtsPlayer({
             </div>
           )}
 
-          <div className="px-3.5 py-2.5 flex items-center justify-between gap-2.5">
+          <div className="px-3 sm:px-3.5 py-2.5 flex items-center justify-between gap-2">
             {/* Left: Compact Info */}
-            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               <div
-                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-2xs ${
+                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shrink-0 shadow-2xs ${
                   isPlaying
                     ? 'bg-amber-700 text-white animate-pulse'
                     : 'bg-amber-800 text-white'
@@ -480,11 +536,24 @@ export default function WebTtsPlayer({
             </div>
 
             {/* Right: Compact Controls */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <select
+                value={playMode}
+                onChange={(e) => handlePlayModeChange(e.target.value as PlayMode)}
+                className="bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-[11px] sm:text-xs rounded-xl px-1.5 sm:px-2 py-1.5 outline-none focus:border-amber-700 transition cursor-pointer font-semibold"
+                title={isVi ? 'Chế độ khi đọc hết chương' : 'End of chapter behavior'}
+              >
+                {playModeOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.shortLabel}
+                  </option>
+                ))}
+              </select>
+
               <select
                 value={speechRate.toString()}
                 onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
-                className="bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-xs rounded-xl px-2 sm:px-2.5 py-1.5 outline-none focus:border-amber-700 transition cursor-pointer font-semibold"
+                className="bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-[11px] sm:text-xs rounded-xl px-1.5 sm:px-2 py-1.5 outline-none focus:border-amber-700 transition cursor-pointer font-semibold"
                 title="Tốc độ đọc / Speed"
               >
                 {SPEED_OPTIONS.map((opt) => (
@@ -497,25 +566,25 @@ export default function WebTtsPlayer({
               {!isPlaying ? (
                 <button
                   onClick={startPlaying}
-                  className="bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold px-3 sm:px-3.5 py-1.5 rounded-xl transition shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                  className="bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold px-2.5 sm:px-3.5 py-1.5 rounded-xl transition shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
                 >
                   <span>{isPaused ? '▶' : '🎧'}</span>
-                  <span className="hidden xs:inline">{isPaused ? t.ttsResume : t.ttsPlay}</span>
+                  <span className="hidden sm:inline">{isPaused ? t.ttsResume : t.ttsPlay}</span>
                 </button>
               ) : (
                 <button
                   onClick={pauseAudio}
-                  className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-3 sm:px-3.5 py-1.5 rounded-xl transition shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                  className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-2.5 sm:px-3.5 py-1.5 rounded-xl transition shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
                 >
                   <span>⏸</span>
-                  <span className="hidden xs:inline">{t.ttsPaused}</span>
+                  <span className="hidden sm:inline">{t.ttsPaused}</span>
                 </button>
               )}
 
               {(isPlaying || isPaused) && (
                 <button
                   onClick={() => stopAudio()}
-                  className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold px-2.5 py-1.5 rounded-xl transition cursor-pointer"
+                  className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold px-2 py-1.5 rounded-xl transition cursor-pointer"
                   title={t.ttsStop}
                 >
                   ⏹

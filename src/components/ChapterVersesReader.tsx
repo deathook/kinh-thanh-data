@@ -179,6 +179,14 @@ export default function ChapterVersesReader({
     }
   };
 
+  const handlePlayFromVerse = (verseNum: number) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('bible-tts-play-from-verse', { detail: { verse: verseNum } })
+      );
+    }
+  };
+
   const isVi = lang === 'vi';
 
   return (
@@ -368,6 +376,16 @@ export default function ChapterVersesReader({
                     </button>
                   )}
                 </div>
+
+                {/* Play from this Verse Button */}
+                <button
+                  onClick={() => handlePlayFromVerse(v.verse)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-semibold transition cursor-pointer shadow-2xs"
+                  title={isVi ? `Bắt đầu nghe từ câu ${v.verse}` : `Play from verse ${v.verse}`}
+                >
+                  <span>▶</span>
+                  <span>{isVi ? 'Nghe từ đây' : 'Play'}</span>
+                </button>
 
                 {/* Note Button */}
                 <button

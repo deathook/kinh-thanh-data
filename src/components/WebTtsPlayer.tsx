@@ -37,8 +37,11 @@ export default function WebTtsPlayer({
   const [playMode, setPlayMode] = useState<PlayMode>('next');
   const [isSupported] = useState(true);
   const [showFloating, setShowFloating] = useState(false);
+  const [openMenuLocation, setOpenMenuLocation] = useState<'inline' | 'floating' | null>(null);
 
   const inlineCardRef = useRef<HTMLDivElement | null>(null);
+  const inlineMenuRef = useRef<HTMLDivElement | null>(null);
+  const floatingMenuRef = useRef<HTMLDivElement | null>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeIndexRef = useRef<number>(0);
@@ -51,23 +54,43 @@ export default function WebTtsPlayer({
   const t = getTranslation(lang);
   const isVi = lang === 'vi';
 
-  const playModeOptions: Array<{ value: PlayMode; label: string; shortLabel: string }> = [
+  const playModeOptions: Array<{ value: PlayMode; icon: string; label: string }> = [
     {
       value: 'next',
-      label: isVi ? '⏭ Tự chuyển chương' : '⏭ Auto next chapter',
-      shortLabel: isVi ? '⏭ Chuyển chương' : '⏭ Next',
+      icon: '⏭',
+      label: isVi ? 'Chuyển chương' : 'Auto next chapter',
     },
     {
       value: 'repeat',
-      label: isVi ? '🔁 Lặp lại chương này' : '🔁 Repeat chapter',
-      shortLabel: isVi ? '🔁 Lặp lại' : '🔁 Repeat',
+      icon: '🔁',
+      label: isVi ? 'Lặp lại chương này' : 'Repeat chapter',
     },
     {
       value: 'stop',
-      label: isVi ? '⏹ Dừng khi hết chương' : '⏹ Stop at end',
-      shortLabel: isVi ? '⏹ Dừng hết chương' : '⏹ Stop',
+      icon: '⏹',
+      label: isVi ? 'Dừng hết chương' : 'Stop at end',
     },
   ];
+
+  const currentModeOption =
+    playModeOptions.find((o) => o.value === playMode) || playModeOptions[0];
+
+  // Close mode menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        inlineMenuRef.current &&
+        !inlineMenuRef.current.contains(target) &&
+        floatingMenuRef.current &&
+        !floatingMenuRef.current.contains(target)
+      ) {
+        setOpenMenuLocation(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Detect when inline player card scrolls out of view to show floating bottom player
   useEffect(() => {
@@ -226,7 +249,6 @@ export default function WebTtsPlayer({
 
       const v = verses[index];
       // Before reading verse 1 (index === 0), read the book & chapter heading (e.g. "Giăng Chương 1. ").
-      // Do not prepend "Câu 1", "Câu 2", etc.
       const fullText = index === 0 ? `${title}. ${v.text}` : v.text;
 
       const matchedVoice = findMatchingVoice(voicesRef.current, lang);
@@ -307,6 +329,27 @@ export default function WebTtsPlayer({
     [lang, langConfig.voiceLang, nextChapterUrl, router, stopAudio, title, verses]
   );
 
+  // Listen for "Play from this verse" event dispatched from ChapterVersesReader
+  useEffect(() => {
+    const handlePlayFromVerse = (e: Event) => {
+      const customEvent = e as CustomEvent<{ verse: number }>;
+      const targetVerseNum = customEvent.detail?.verse;
+      if (!targetVerseNum) return;
+
+      const targetIndex = verses.findIndex((v) => v.verse === targetVerseNum);
+      if (targetIndex >= 0) {
+        stopAudio();
+        isPlayingRef.current = true;
+        setIsPlaying(true);
+        setIsPaused(false);
+        speakVerseAtIndex(targetIndex);
+      }
+    };
+
+    window.addEventListener('bible-tts-play-from-verse', handlePlayFromVerse);
+    return () => window.removeEventListener('bible-tts-play-from-verse', handlePlayFromVerse);
+  }, [verses, stopAudio, speakVerseAtIndex]);
+
   // Auto-start playback if navigated from previous chapter completion
   useEffect(() => {
     if (typeof window === 'undefined' || verses.length === 0) return;
@@ -338,9 +381,10 @@ export default function WebTtsPlayer({
     }
   };
 
-  const handlePlayModeChange = (newMode: PlayMode) => {
+  const handleSelectPlayMode = (newMode: PlayMode) => {
     setPlayMode(newMode);
     playModeRef.current = newMode;
+    setOpenMenuLocation(null);
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('tts_play_mode', newMode);
     }
@@ -402,23 +446,23 @@ export default function WebTtsPlayer({
         ref={inlineCardRef}
         className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-4 my-6 shadow-xs"
       >
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           {/* Left: Speaker Icon & Title */}
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div
-              className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-2xs ${
+              className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-2xs ${
                 isPlaying
                   ? 'bg-amber-700 text-white animate-pulse'
                   : 'bg-amber-800 text-white'
               }`}
             >
-              <span className="text-lg">🔊</span>
+              <span className="text-base sm:text-lg">🔊</span>
             </div>
-            <div>
-              <div className="font-semibold text-stone-900 text-sm">
+            <div className="min-w-0 flex-1">
+              <div className="font-semibold text-stone-900 text-sm truncate">
                 {t.ttsTitle}
               </div>
-              <div className="text-xs text-stone-500">
+              <div className="text-xs text-stone-500 truncate">
                 {isPlaying && currentVerseIndex !== null
                   ? `${t.ttsPlaying} (${t.verse} ${verses[currentVerseIndex]?.verse}/${verses.length})`
                   : isPaused
@@ -428,27 +472,51 @@ export default function WebTtsPlayer({
             </div>
           </div>
 
-          {/* Right: Controls */}
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-            {/* Play Mode Selector: Next (default), Repeat, Stop */}
-            <select
-              value={playMode}
-              onChange={(e) => handlePlayModeChange(e.target.value as PlayMode)}
-              className="bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-2.5 py-2 outline-none focus:border-amber-700 transition cursor-pointer font-medium shadow-2xs"
-              title={isVi ? 'Chế độ khi đọc hết chương' : 'End of chapter behavior'}
-            >
-              {playModeOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+          {/* Right: Icon Controls */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Play Mode Icon Dropdown */}
+            <div className="relative" ref={inlineMenuRef}>
+              <button
+                onClick={() =>
+                  setOpenMenuLocation(openMenuLocation === 'inline' ? null : 'inline')
+                }
+                className="w-9 h-9 bg-white hover:bg-stone-100 border border-stone-300 text-stone-700 text-sm rounded-xl flex items-center justify-center transition cursor-pointer shadow-2xs"
+                title={currentModeOption.label}
+              >
+                {currentModeOption.icon}
+              </button>
+
+              {openMenuLocation === 'inline' && (
+                <div className="absolute right-0 top-full mt-1.5 w-48 bg-white border border-stone-200 rounded-2xl shadow-xl py-1.5 z-50">
+                  {playModeOptions.map((opt) => {
+                    const active = opt.value === playMode;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => handleSelectPlayMode(opt.value)}
+                        className={`w-full px-3.5 py-2 text-left text-xs font-semibold flex items-center justify-between transition cursor-pointer ${
+                          active
+                            ? 'bg-amber-50 text-amber-900'
+                            : 'text-stone-700 hover:bg-stone-50'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <span>{opt.icon}</span>
+                          <span>{opt.label}</span>
+                        </span>
+                        {active && <span className="text-amber-800 font-bold">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* Speed Selector: 0.5x, 0.75x, 1.0x, 1.25x, 1.5x, 1.75x, 2.0x */}
             <select
               value={speechRate.toString()}
               onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
-              className="bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-2.5 py-2 outline-none focus:border-amber-700 transition cursor-pointer font-medium shadow-2xs"
+              className="h-9 bg-white border border-stone-300 text-stone-700 text-xs rounded-xl px-2.5 outline-none focus:border-amber-700 transition cursor-pointer font-semibold shadow-2xs"
               title="Tốc độ đọc / Speed"
             >
               {SPEED_OPTIONS.map((opt) => (
@@ -458,32 +526,33 @@ export default function WebTtsPlayer({
               ))}
             </select>
 
-            {/* Play / Pause / Resume */}
+            {/* Play / Pause Button (Icon only) */}
             {!isPlaying ? (
               <button
                 onClick={startPlaying}
-                className="bg-amber-800 hover:bg-amber-900 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="w-9 h-9 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-xl transition shadow-xs flex items-center justify-center cursor-pointer"
+                title={isPaused ? t.ttsResume : t.ttsPlay}
               >
-                <span>{isPaused ? '▶' : '🎧'}</span>
-                <span>{isPaused ? t.ttsResume : t.ttsPlay}</span>
+                ▶
               </button>
             ) : (
               <button
                 onClick={pauseAudio}
-                className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                className="w-9 h-9 bg-amber-700 hover:bg-amber-800 text-white text-sm font-bold rounded-xl transition shadow-xs flex items-center justify-center cursor-pointer"
+                title={t.ttsPaused}
               >
-                <span>⏸</span>
-                <span>{t.ttsPaused}</span>
+                ⏸
               </button>
             )}
 
-            {/* Stop Button */}
+            {/* Stop Button (Icon only) */}
             {(isPlaying || isPaused) && (
               <button
                 onClick={() => stopAudio()}
-                className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold px-3 py-2 rounded-xl transition cursor-pointer"
+                className="w-9 h-9 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-bold rounded-xl transition flex items-center justify-center cursor-pointer"
+                title={t.ttsStop}
               >
-                ⏹ {t.ttsStop}
+                ⏹
               </button>
             )}
           </div>
@@ -492,16 +561,16 @@ export default function WebTtsPlayer({
 
       {/* 2. Floating Bottom Player Bar (shown when user scrolls down past inline card) */}
       <div
-        className={`fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-2xl transition-all duration-300 ${
+        className={`fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-xl transition-all duration-300 ${
           showFloating
             ? 'translate-y-0 opacity-100 pointer-events-auto'
             : 'translate-y-12 opacity-0 pointer-events-none'
         }`}
       >
-        <div className="bg-white/95 backdrop-blur-md border border-amber-300/90 rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-white/95 backdrop-blur-md border border-amber-300/90 rounded-2xl shadow-xl relative">
           {/* Progress Bar on top edge when playing/paused */}
           {(isPlaying || isPaused) && (
-            <div className="w-full h-1 bg-amber-100">
+            <div className="w-full h-1 bg-amber-100 rounded-t-2xl overflow-hidden">
               <div
                 className="h-full bg-amber-700 transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
@@ -509,11 +578,11 @@ export default function WebTtsPlayer({
             </div>
           )}
 
-          <div className="px-3 sm:px-3.5 py-2.5 flex items-center justify-between gap-2">
+          <div className="px-3.5 py-2.5 flex items-center justify-between gap-2.5">
             {/* Left: Compact Info */}
-            <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div
-                className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shrink-0 shadow-2xs ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-2xs ${
                   isPlaying
                     ? 'bg-amber-700 text-white animate-pulse'
                     : 'bg-amber-800 text-white'
@@ -535,25 +604,51 @@ export default function WebTtsPlayer({
               </div>
             </div>
 
-            {/* Right: Compact Controls */}
+            {/* Right: Compact Icon Controls */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <select
-                value={playMode}
-                onChange={(e) => handlePlayModeChange(e.target.value as PlayMode)}
-                className="bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-[11px] sm:text-xs rounded-xl px-1.5 sm:px-2 py-1.5 outline-none focus:border-amber-700 transition cursor-pointer font-semibold"
-                title={isVi ? 'Chế độ khi đọc hết chương' : 'End of chapter behavior'}
-              >
-                {playModeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.shortLabel}
-                  </option>
-                ))}
-              </select>
+              {/* Play Mode Icon Dropdown (pops upward) */}
+              <div className="relative" ref={floatingMenuRef}>
+                <button
+                  onClick={() =>
+                    setOpenMenuLocation(openMenuLocation === 'floating' ? null : 'floating')
+                  }
+                  className="w-8 h-8 sm:w-9 sm:h-9 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-sm rounded-xl flex items-center justify-center transition cursor-pointer"
+                  title={currentModeOption.label}
+                >
+                  {currentModeOption.icon}
+                </button>
 
+                {openMenuLocation === 'floating' && (
+                  <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-stone-200 rounded-2xl shadow-xl py-1.5 z-50">
+                    {playModeOptions.map((opt) => {
+                      const active = opt.value === playMode;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => handleSelectPlayMode(opt.value)}
+                          className={`w-full px-3.5 py-2 text-left text-xs font-semibold flex items-center justify-between transition cursor-pointer ${
+                            active
+                              ? 'bg-amber-50 text-amber-900'
+                              : 'text-stone-700 hover:bg-stone-50'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span>{opt.icon}</span>
+                            <span>{opt.label}</span>
+                          </span>
+                          {active && <span className="text-amber-800 font-bold">✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Speed Selector */}
               <select
                 value={speechRate.toString()}
                 onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
-                className="bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-[11px] sm:text-xs rounded-xl px-1.5 sm:px-2 py-1.5 outline-none focus:border-amber-700 transition cursor-pointer font-semibold"
+                className="h-8 sm:h-9 bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-800 text-xs rounded-xl px-2 outline-none focus:border-amber-700 transition cursor-pointer font-semibold"
                 title="Tốc độ đọc / Speed"
               >
                 {SPEED_OPTIONS.map((opt) => (
@@ -563,28 +658,30 @@ export default function WebTtsPlayer({
                 ))}
               </select>
 
+              {/* Play / Pause Button (Icon only) */}
               {!isPlaying ? (
                 <button
                   onClick={startPlaying}
-                  className="bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold px-2.5 sm:px-3.5 py-1.5 rounded-xl transition shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                  className="w-8 h-8 sm:w-9 sm:h-9 bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold rounded-xl transition shadow-2xs flex items-center justify-center cursor-pointer"
+                  title={isPaused ? t.ttsResume : t.ttsPlay}
                 >
-                  <span>{isPaused ? '▶' : '🎧'}</span>
-                  <span className="hidden sm:inline">{isPaused ? t.ttsResume : t.ttsPlay}</span>
+                  ▶
                 </button>
               ) : (
                 <button
                   onClick={pauseAudio}
-                  className="bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold px-2.5 sm:px-3.5 py-1.5 rounded-xl transition shadow-2xs flex items-center gap-1 cursor-pointer whitespace-nowrap"
+                  className="w-8 h-8 sm:w-9 sm:h-9 bg-amber-700 hover:bg-amber-800 text-white text-sm font-bold rounded-xl transition shadow-2xs flex items-center justify-center cursor-pointer"
+                  title={t.ttsPaused}
                 >
-                  <span>⏸</span>
-                  <span className="hidden sm:inline">{t.ttsPaused}</span>
+                  ⏸
                 </button>
               )}
 
+              {/* Stop Button (Icon only) */}
               {(isPlaying || isPaused) && (
                 <button
                   onClick={() => stopAudio()}
-                  className="bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold px-2 py-1.5 rounded-xl transition cursor-pointer"
+                  className="w-8 h-8 sm:w-9 sm:h-9 bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-bold rounded-xl transition flex items-center justify-center cursor-pointer"
                   title={t.ttsStop}
                 >
                   ⏹

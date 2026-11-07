@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://kinhthanh.khoahoctamlinh.vn'),
   title: {
     default: 'Thánh Kinh v1.1.0 & 31 Bài Học Tâm Linh | 12 Ngôn Ngữ Trực Tuyến',
-    template: '%s | Thánh Kinh & Cầu Nguyện',
+    template: '%s',
   },
   description: 'Nền tảng đọc Kinh Thánh 12 ngôn ngữ thế giới (Bản Truyền Thống 1925, Berean Standard Bible,...) và 31 bài học chuyển hóa tâm thức trực tuyến với âm thanh giọng đọc TTS bản xứ.',
   keywords: [
@@ -40,13 +40,18 @@ export const metadata: Metadata = {
   publisher: 'Thánh Kinh & Cầu Nguyện',
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon.png', sizes: '512x512', type: 'image/png' },
-      { url: '/favicon.ico' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
     apple: [
       { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
+    shortcut: ['/favicon.ico'],
   },
   openGraph: {
     title: 'Thánh Kinh v1.1.0 & 31 Bài Học Tâm Linh | 12 Ngôn Ngữ Trực Tuyến',

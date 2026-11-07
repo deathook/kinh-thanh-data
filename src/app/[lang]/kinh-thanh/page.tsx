@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getAllBooks } from '@/lib/bible';
-import { isValidLang, getLangConfig, getTranslation } from '@/lib/i18n';
+import { isValidLang, getLangConfig, getTranslation, LANGUAGE_LIST } from '@/lib/i18n';
 import { getHomeTranslation } from '@/lib/homeI18n';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -20,10 +20,48 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const cfg = getLangConfig(lang);
   const t = getTranslation(lang);
+  const baseUrl = 'https://kinhthanh.khoahoctamlinh.vn';
+
+  const title = `${t.readBible} - ${t.all66Books} (${cfg.bibleName}) | ${t.siteTitle}`;
+  const description = `${t.readOnline} ${cfg.bibleName} (${cfg.localName}) - ${t.oldTestament} & ${t.newTestament}. ${t.ttsTitle}.`;
+
+  const alternatesLanguages: Record<string, string> = {};
+  LANGUAGE_LIST.forEach((l) => {
+    alternatesLanguages[l.code] = `${baseUrl}/${l.code}/kinh-thanh`;
+  });
 
   return {
-    title: `${t.readBible} - ${t.all66Books} (${cfg.bibleName})`,
-    description: `${t.readBible} ${cfg.bibleName} - ${cfg.localName}. ${t.oldTestament} & ${t.newTestament}.`,
+    title: {
+      absolute: title,
+    },
+    description,
+    keywords: [t.readBible, t.all66Books, cfg.bibleName, t.siteTitle, t.oldTestament, t.newTestament],
+    alternates: {
+      canonical: `${baseUrl}/${lang}/kinh-thanh`,
+      languages: alternatesLanguages,
+    },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `${baseUrl}/${lang}/kinh-thanh`,
+      siteName: t.siteTitle,
+      locale: cfg.voiceLang.replace('-', '_'),
+      images: [
+        {
+          url: '/images/feature-graphic.png',
+          width: 1024,
+          height: 500,
+          alt: `${t.readBible} - ${t.siteTitle}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/images/feature-graphic.png'],
+    },
   };
 }
 

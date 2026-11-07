@@ -6,6 +6,7 @@ import {
   getChapterVerses,
   getAllBooks,
   getCanonicalSlug,
+  formatChapter,
 } from '@/lib/bible';
 import {
   SUPPORTED_LANGUAGES,
@@ -39,30 +40,50 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const chNum = parseInt(chapter, 10);
   const cfg = getLangConfig(lang);
   const t = getTranslation(lang);
+  const baseUrl = 'https://kinhthanh.khoahoctamlinh.vn';
 
-  const title = `${book.name} ${t.chapter} ${chNum} - ${cfg.bibleName}`;
-  const description = `${t.readOnline} ${book.name} ${t.chapter} ${chNum} (${cfg.bibleName}) - ${t.ttsTitle}.`;
+  const formattedCh = formatChapter(book.name, chNum, lang);
+  const title = `${formattedCh} - ${cfg.bibleName} | ${t.siteTitle}`;
+  const description = `${t.readOnline} ${formattedCh} (${cfg.bibleName}) - ${t.ttsTitle}.`;
 
   // Build hreflang alternates for all 12 languages for Google SEO
   const alternatesLanguages: Record<string, string> = {};
   LANGUAGE_LIST.forEach((l) => {
     const slugInLang = getCanonicalSlug(book.id, l.code);
-    alternatesLanguages[l.code] = `/${l.code}/kinh-thanh/${slugInLang}/${chNum}`;
+    alternatesLanguages[l.code] = `${baseUrl}/${l.code}/kinh-thanh/${slugInLang}/${chNum}`;
   });
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     description,
-    keywords: [book.name, `${t.chapter} ${chNum}`, cfg.bibleName, 'Holy Scripture', 'Bible Audio TTS'],
+    keywords: [book.name, formattedCh, cfg.bibleName, t.siteTitle, t.readBible, 'Holy Scripture', 'Bible Audio TTS'],
     alternates: {
-      canonical: `/${lang}/kinh-thanh/${book.slug}/${chNum}`,
+      canonical: `${baseUrl}/${lang}/kinh-thanh/${book.slug}/${chNum}`,
       languages: alternatesLanguages,
     },
     openGraph: {
       title,
       description,
       type: 'article',
+      url: `${baseUrl}/${lang}/kinh-thanh/${book.slug}/${chNum}`,
+      siteName: t.siteTitle,
       locale: cfg.voiceLang.replace('-', '_'),
+      images: [
+        {
+          url: '/images/feature-graphic.png',
+          width: 1024,
+          height: 500,
+          alt: `${formattedCh} - ${t.siteTitle}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/images/feature-graphic.png'],
     },
   };
 }

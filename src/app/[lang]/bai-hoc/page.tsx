@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import SmartAppBanner from '@/components/SmartAppBanner';
 import { getAllDevotionalTopics, getAllDevotionalLessons } from '@/lib/devotionalData';
 import { getAllDialogueStages, getAllDialogueLessons } from '@/lib/dialogueData';
-import { isValidLang, getLangConfig, getTranslation } from '@/lib/i18n';
+import { isValidLang, getLangConfig, getTranslation, LANGUAGE_LIST } from '@/lib/i18n';
 import { getHomeTranslation } from '@/lib/homeI18n';
 
 interface PageProps {
@@ -22,10 +22,48 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const cfg = getLangConfig(lang);
   const t = getTranslation(lang);
   const ht = getHomeTranslation(lang);
+  const baseUrl = 'https://kinhthanh.khoahoctamlinh.vn';
+
+  const title = `${t.lessons} (${t.lessonsBadge}) - ${ht.lessonsSectionTitle} | ${t.siteTitle}`;
+  const description = `${ht.track1Title} & ${ht.track2Title} - 31 Spiritual Lessons.`;
+
+  const alternatesLanguages: Record<string, string> = {};
+  LANGUAGE_LIST.forEach((l) => {
+    alternatesLanguages[l.code] = `${baseUrl}/${l.code}/bai-hoc`;
+  });
 
   return {
-    title: `${t.lessons} (${t.lessonsBadge}) - ${ht.lessonsSectionTitle} | ${cfg.localName}`,
-    description: `${ht.track1Title} & ${ht.track2Title} - 31 Spiritual Lessons.`,
+    title: {
+      absolute: title,
+    },
+    description,
+    keywords: [t.lessons, ht.lessonsSectionTitle, t.siteTitle, cfg.localName],
+    alternates: {
+      canonical: `${baseUrl}/${lang}/bai-hoc`,
+      languages: alternatesLanguages,
+    },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `${baseUrl}/${lang}/bai-hoc`,
+      siteName: t.siteTitle,
+      locale: cfg.voiceLang.replace('-', '_'),
+      images: [
+        {
+          url: '/images/feature-graphic.png',
+          width: 1024,
+          height: 500,
+          alt: `${t.lessons} - ${t.siteTitle}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/images/feature-graphic.png'],
+    },
   };
 }
 

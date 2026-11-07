@@ -28,8 +28,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = ht.heroDesc;
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     description,
+    keywords: [t.siteTitle, cfg.bibleName, t.readBible, t.lessons, cfg.localName, 'Holy Bible'],
     alternates: {
       canonical: lang === 'vi' ? baseUrl : `${baseUrl}/${lang}`,
       languages: languagesObj,
@@ -48,6 +51,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           alt: t.siteTitle,
         },
       ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/images/feature-graphic.png'],
     },
   };
 }

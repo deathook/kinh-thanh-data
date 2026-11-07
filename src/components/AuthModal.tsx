@@ -41,7 +41,7 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
   } = useAuth();
 
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
-  const [forgotStep, setForgotStep] = useState<'request' | 'verify'>('request');
+  const [forgotStep, setForgotStep] = useState<'request' | 'verify' | 'success'>('request');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -65,10 +65,17 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
   useEffect(() => {
     if (isAuthModalOpen) {
       refreshCaptcha();
-      setErrorMsg(null);
-      setSuccessMsg(null);
     }
   }, [isAuthModalOpen, mode, refreshCaptcha]);
+
+  useEffect(() => {
+    if (!isAuthModalOpen) {
+      setErrorMsg(null);
+      setSuccessMsg(null);
+      setMode('login');
+      setForgotStep('request');
+    }
+  }, [isAuthModalOpen]);
 
   // Countdown timer for password reset rate-limit
   useEffect(() => {
@@ -187,8 +194,7 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
           // Also support if user pasted Firebase reset code/link
           await confirmPasswordResetWithOobCode(trimmedCode, password);
         }
-        setMode('login');
-        setForgotStep('request');
+        setForgotStep('success');
         setPassword('');
         setConfirmPassword('');
         setSuccessMsg(
@@ -323,10 +329,38 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
             </div>
           )}
 
-          {successMsg && (
+          {successMsg && !(mode === 'forgot' && forgotStep === 'success') && (
             <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl flex items-start gap-2">
               <span className="shrink-0">✅</span>
               <span>{successMsg}</span>
+            </div>
+          )}
+
+          {mode === 'forgot' && forgotStep === 'success' && (
+            <div className="p-5 bg-emerald-50 border-2 border-emerald-300 text-emerald-900 rounded-2xl text-center space-y-3">
+              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-3xl shadow-xs">
+                ✅
+              </div>
+              <h3 className="text-base font-bold text-emerald-900">
+                {isVi ? 'Đổi Mật Khẩu Thành Công!' : 'Password Reset Successful!'}
+              </h3>
+              <p className="text-xs text-emerald-800 leading-relaxed">
+                {successMsg ||
+                  (isVi
+                    ? 'Mật khẩu mới của bạn đã được lưu an toàn. Bây giờ bạn có thể đăng nhập bằng mật khẩu mới.'
+                    : 'Your new password has been saved securely. You can now sign in with your new password.')}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setForgotStep('request');
+                  setErrorMsg(null);
+                }}
+                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 px-4 rounded-xl transition shadow-xs cursor-pointer text-sm mt-2"
+              >
+                {isVi ? 'Đăng Nhập Ngay →' : 'Sign In Now →'}
+              </button>
             </div>
           )}
 
@@ -369,6 +403,7 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
           )}
 
           {/* Email / Password / Register / Forgot Form */}
+          {!(mode === 'forgot' && forgotStep === 'success') && (
           <form onSubmit={handleEmailAuth} className="space-y-3">
             {/* Hidden Honeypot against automated bots */}
             <input
@@ -609,6 +644,7 @@ export default function AuthModal({ currentLang = 'vi' }: AuthModalProps) {
               </div>
             )}
           </form>
+          )}
 
           {/* Toggle Login / Register / Forgot */}
           <div className="text-center text-xs text-stone-600 pt-2 border-t border-stone-100">

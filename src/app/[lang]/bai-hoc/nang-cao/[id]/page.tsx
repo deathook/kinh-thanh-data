@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import SmartAppBanner from '@/components/SmartAppBanner';
 import LessonReaderView, { LessonContent } from '@/components/LessonReaderView';
 import { getAllDialogueLessons, getDialogueLessonById } from '@/lib/dialogueData';
-import { isValidLang } from '@/lib/i18n';
+import { isValidLang, getLangConfig, getTranslation, LANGUAGE_LIST } from '@/lib/i18n';
 
 interface PageProps {
   params: Promise<{
@@ -19,11 +19,59 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!isValidLang(lang)) return { title: 'Not Found' };
 
   const lesson = getDialogueLessonById(id);
-  if (!lesson) return { title: 'Không tìm thấy bài học' };
+  if (!lesson) return { title: 'Not Found' };
+
+  const cfg = getLangConfig(lang);
+  const t = getTranslation(lang);
+  const isVi = lang === 'vi';
+  const baseUrl = 'https://kinhthanh.khoahoctamlinh.vn';
+
+  const lessonTitle = isVi ? lesson.titleVi : lesson.titleEn;
+  const lessonSub = isVi ? lesson.subtitleVi : lesson.subtitleEn;
+  const stagePrefix = isVi ? `Chặng ${lesson.stageNumber}` : `Stage ${lesson.stageNumber}`;
+  const lessonPrefix = isVi ? `Bài ${lesson.lessonNumber}` : `Lesson ${lesson.lessonNumber}`;
+  const sectionLabel = isVi ? 'Đối Thoại - Lời Chúa Cha' : 'The Dialogue - Divine Teachings';
+
+  const title = `${stagePrefix} - ${lessonPrefix}: ${lessonTitle} | ${sectionLabel} - ${t.siteTitle}`;
+  const description = `${lessonSub}. ${t.readOnline} - ${cfg.bibleName}.`;
+
+  const alternatesLanguages: Record<string, string> = {};
+  LANGUAGE_LIST.forEach((l) => {
+    alternatesLanguages[l.code] = `${baseUrl}/${l.code}/bai-hoc/nang-cao/${id}`;
+  });
 
   return {
-    title: `Chặng ${lesson.stageNumber} - Bài ${lesson.lessonNumber}: ${lesson.titleVi} | Đối Thoại - Lời Chúa Cha`,
-    description: `${lesson.subtitleVi}. Trích xuất tác phẩm Đối Thoại của Thánh Catarina Siena với các trích dẫn Kinh Thánh đối chiếu.`,
+    title: {
+      absolute: title,
+    },
+    description,
+    keywords: [lessonTitle, stagePrefix, lessonPrefix, sectionLabel, t.siteTitle, cfg.bibleName],
+    alternates: {
+      canonical: `${baseUrl}/${lang}/bai-hoc/nang-cao/${id}`,
+      languages: alternatesLanguages,
+    },
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      url: `${baseUrl}/${lang}/bai-hoc/nang-cao/${id}`,
+      siteName: t.siteTitle,
+      locale: cfg.voiceLang.replace('-', '_'),
+      images: [
+        {
+          url: '/images/feature-graphic.png',
+          width: 1024,
+          height: 500,
+          alt: `${stagePrefix} - ${lessonPrefix}: ${lessonTitle}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/images/feature-graphic.png'],
+    },
   };
 }
 

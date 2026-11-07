@@ -2,6 +2,9 @@ import { DatabaseSync } from 'node:sqlite';
 import path from 'path';
 import fs from 'fs';
 import { SUPPORTED_LANGUAGES } from './i18n';
+import { getLocalizedBookName, formatChapter, formatChapterOnly } from './bookNames';
+
+export { formatChapter, formatChapterOnly };
 
 export interface BibleBook {
   id: number;
@@ -51,7 +54,11 @@ export function getBibleDb(lang: string = 'vi'): DatabaseSync {
 export function getAllBooks(lang: string = 'vi'): BibleBook[] {
   const db = getBibleDb(lang);
   const rows = db.prepare('SELECT * FROM books ORDER BY book_order ASC').all() as unknown as BibleBook[];
-  return toPlain(rows);
+  const plain = toPlain(rows);
+  return plain.map((b) => ({
+    ...b,
+    name: getLocalizedBookName(b.id, lang, b.name),
+  }));
 }
 
 export function getBookBySlug(slugOrCode: string, lang: string = 'vi'): BibleBook | null {
@@ -60,11 +67,17 @@ export function getBookBySlug(slugOrCode: string, lang: string = 'vi'): BibleBoo
 
   // Try slug first
   let book = db.prepare('SELECT * FROM books WHERE slug = ? LIMIT 1').get(normalized) as unknown as BibleBook | undefined;
-  if (book) return toPlain(book);
+  if (book) {
+    const plain = toPlain(book);
+    return { ...plain, name: getLocalizedBookName(plain.id, lang, plain.name) };
+  }
 
   // Try code
   book = db.prepare('SELECT * FROM books WHERE LOWER(code) = ? LIMIT 1').get(normalized) as unknown as BibleBook | undefined;
-  if (book) return toPlain(book);
+  if (book) {
+    const plain = toPlain(book);
+    return { ...plain, name: getLocalizedBookName(plain.id, lang, plain.name) };
+  }
 
   // Fallback matching ID across vi/en
   try {
@@ -72,14 +85,20 @@ export function getBookBySlug(slugOrCode: string, lang: string = 'vi'): BibleBoo
     const viBook = viDb.prepare('SELECT id FROM books WHERE slug = ? OR LOWER(code) = ? LIMIT 1').get(normalized, normalized) as { id: number } | undefined;
     if (viBook) {
       const match = db.prepare('SELECT * FROM books WHERE id = ? LIMIT 1').get(viBook.id) as unknown as BibleBook | undefined;
-      return match ? toPlain(match) : null;
+      if (match) {
+        const plain = toPlain(match);
+        return { ...plain, name: getLocalizedBookName(plain.id, lang, plain.name) };
+      }
     }
 
     const enDb = getBibleDb('en');
     const enBook = enDb.prepare('SELECT id FROM books WHERE slug = ? OR LOWER(code) = ? LIMIT 1').get(normalized, normalized) as { id: number } | undefined;
     if (enBook) {
       const match = db.prepare('SELECT * FROM books WHERE id = ? LIMIT 1').get(enBook.id) as unknown as BibleBook | undefined;
-      return match ? toPlain(match) : null;
+      if (match) {
+        const plain = toPlain(match);
+        return { ...plain, name: getLocalizedBookName(plain.id, lang, plain.name) };
+      }
     }
   } catch {
     // ignore
